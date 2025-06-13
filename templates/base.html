@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title%}Sistema de Academia {% endblock %}</title>
+  <style>
+    body { font-family: sans-serif; margin: 20px; background-color: #f4f4f4; color: #333;}
+    nav { background-color: #333; padding: 10px; margin-bottom: 20px;}
+    nav a { color:white; margin: 0 10px; text-decoration: none;}
+    nav a:hover { text-decoration: underline;}
+    .container { background-color: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1);}
+    .messages { list-style: none; padding: 0; margin-bottom: 15px;}
+    .messages li { padding: 10px; margin-bottom: 10px; border-radius: 15px;}
+    .messages li.seccess { background-color: #4edda4; color:#155724; border:1px solid #c3e6cb  }
+    .messages li.erro { background-color: #f8d7da; color: #155724; border: 1px solid #f5c6cb;}  
+    button { padding: 10px 15px; background-color: #5cb85c; color: white; border-radius: 4px; cursor: pointer; }
+    button:hover { background-color: #4cae4c; }
+    input [type="text"], input[type="password"] , input[ type = "email"] { width: calc(100% - 22p);padding: 10 px; border: 1px solid #ccc; border-radius: 4px;}
+    label { display: block; margin-bottom: 5px;}
+
+
+  </style>
+</head>
+<body>
+    <nav>
+    <a href="{% url 'pagina_inicial' }">Início</a>
+    {% if user.is_authenticated %}
+      <span>Olá, {{ user.name }}! </span>
+      <form action="{% url 'logout' %}" method="post" style="display: inline;">
+          {% csrf_token %}
+          <button type="submit" style="background: color #d9534f; margin-left: 10px;">Sair</button>
+      </form>
+      {% else %}
+        <a href="{% url 'login' %}">Login</a>
+        <a href="{% url 'registrar' %}">Registrar</a>
+      {% endif %}
+    </nav>
+    <div class="container">
+          {% if messages %}
+          <ul class="messages">
+            {% for message in message% }
+            <li {% if message.tags %} class="{{ message.tags }}"{% endif%}>{{ message}}</li>
+
+          </ul>
+          {% endif %}
+          {% block content %}{% endblock%}
+
+      </div>
+        
+  <footer>
+    <p style="text-align: center; margin-top: 20px;">&copy; {% now "Y" %} Sistema de Academia</p> 
+
+  </footer>
+</body>
+</html>
