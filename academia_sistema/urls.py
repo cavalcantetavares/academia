@@ -15,8 +15,14 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include #adicione 'include' para incluir urls de outros apps
+from contas import views as contas_views # para a pagina inicial
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('', contas_views.pagina_inicial,name = 'pagina_inicial'), # Nossa página inicial
+    path('contas/', include('contas.urls')), # Inclui as URLs do app 'contas'
+    path('contas/', include('django.contrib.auth.urls')),# Inclui URLs prontas do Django para login, logout, reset de senha, etc.                                                       # Isso fornece rotas como /contas/login/, /contas/logout/
 ]
+
+

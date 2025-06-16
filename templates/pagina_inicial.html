@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block title %}Bem-vindo{% endblock %}
+{% block content %}
+    
+        <h1>Bem-vindo ao Sistema da Academia</h1>
+        {% if user.is_authenticated %}
+            <p> Você esta logado como: <strong>{{ user.name }} </strong></p>
+        {% else %} 
+        <p>Explore o sistema fazendo <a href="{% url 'login' %}">Login</a> ou <a href="{% url 'registrar' %}">registrando-se</a></p>
+        {% endif %}
+ 
+{% endblock %}
