@@ -1,0 +1,27 @@
+
+{% extends "base.html" %}
+
+{% block title %}Nossas Modalidades{% endblock %}
+
+{% block content %}
+  <h1 class="mb-4">Modalidades Oferecidas</h1>
+
+  <div class="row">
+    {% for modalidade in modalidades %}
+      <div class="col-md-6 col-lg-4 mb-4">
+        <div class="card h-100">
+          <div class="card-body">
+            <h5 class="card-title">{{ modalidade.nome }}</h5>
+            <p class="card-text">{{ modalidade.descricao|default:"Sem descrição disponível." }}</p>
+          </div>
+        </div>
+      </div>
+    {% empty %}
+      <div class="col-12">
+        <div class="alert alert-warning" role="alert">
+          Nenhuma modalidade foi registrada ainda.
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+{% endblock %}

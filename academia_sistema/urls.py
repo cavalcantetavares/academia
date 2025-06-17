@@ -14,15 +14,21 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+
 from django.contrib import admin
-from django.urls import path, include #adicione 'include' para incluir urls de outros apps
-from contas import views as contas_views # para a pagina inicial
+from django.urls import path, include
+from contas import views as contas_views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', contas_views.pagina_inicial,name = 'pagina_inicial'), # Nossa página inicial
-    path('contas/', include('contas.urls')), # Inclui as URLs do app 'contas'
-    path('contas/', include('django.contrib.auth.urls')),# Inclui URLs prontas do Django para login, logout, reset de senha, etc.                                                       # Isso fornece rotas como /contas/login/, /contas/logout/
+    path('', contas_views.pagina_inicial, name='pagina_inicial'),
+    path('contas/', include('contas.urls')),
+    path('contas/', include('django.contrib.auth.urls')),
+
+    # --- CORREÇÃO FINAL ---
+    # A única linha para o nosso novo app deve ser esta.
+    # Ela diz ao Django para procurar as URLs de gestão no outro ficheiro.
+    path('gestao/', include('gestao_academia.urls')),
 ]
 
 
