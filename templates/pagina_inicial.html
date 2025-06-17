@@ -1,12 +1,17 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
+
 {% block title %}Bem-vindo{% endblock %}
+
 {% block content %}
-    
-        <h1>Bem-vindo ao Sistema da Academia</h1>
-        {% if user.is_authenticated %}
-            <p> Você esta logado como: <strong>{{ user.name }} </strong></p>
-        {% else %} 
-        <p>Explore o sistema fazendo <a href="{% url 'login' %}">Login</a> ou <a href="{% url 'registrar' %}">registrando-se</a></p>
-        {% endif %}
- 
+  <div class="p-5 mb-4 bg-white rounded-3 shadow-sm">
+    <div class="container-fluid py-5">
+      <h1 class="display-5 fw-bold">Bem-vindo ao AcademiaSYS!</h1>
+      <p class="col-md-8 fs-4">Este é o painel de controle do seu novo sistema de gestão de academia.</p>
+      {% if user.is_authenticated %}
+        <p>Você está autenticado como: <strong>{{ user.username }}</strong>.</p>
+      {% else %}
+        <p>Explore o sistema fazendo <a href="{% url 'login' %}">login</a> ou <a href="{% url 'registrar' %}">registando-se</a>.</p>
+      {% endif %}
+    </div>
+  </div>
 {% endblock %}
