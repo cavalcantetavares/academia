@@ -1,3 +1,4 @@
+# academia_sistema/settings.py
 """
 Django settings for academia_sistema project.
 
@@ -127,3 +128,9 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 LOGIN_REDIRECT_URL = '/'  # Redireciona para a página inicial ( DEFINIDA POR NAME= 'pagina_inicial' )
 LOGIN_REDIRECT_URL = '/'  #rEDIRECIONA PARA A PAGINA INICIAL APOS LOGOUT
+
+
+# Configuração de Ficheiros de Média (uploads dos utilizadores)
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+

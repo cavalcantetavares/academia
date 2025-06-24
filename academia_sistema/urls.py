@@ -31,4 +31,9 @@ urlpatterns = [
     path('gestao/', include('gestao_academia.urls')),
 ]
 
+# Adicione esta linha ao final do ficheiro
+# Isto serve os ficheiros de média apenas em modo de desenvolvimento (DEBUG=True)
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
