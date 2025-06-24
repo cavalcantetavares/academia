@@ -1,0 +1,30 @@
+{% extends 'base.html'%}
+
+{% block title %}{% if modalidade %}Editar Modalidade{% else %}Criar Nova Modalidade{% endif %}{% endblock %}
+
+{% block content %}
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="cardi-title">{% if modalidade %}Editar Modalidade{% else %}Criar Nova Modalidade{% endif %}</h2>
+
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token%}
+                        {{ form.as_p}}
+                        <div class="mt-4">
+                            <button type="submit" class="bnt bnt-success">Salvar</button>
+                            <a heref=" { % url 'lista_modalidades' %}" class="bnt bnt-secondary">Cancelar</a>
+                                
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+
+{% endblock %}
