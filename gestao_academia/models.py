@@ -6,18 +6,18 @@ from django.utils import timezone #Para usar a data atual
 class Modalidade(models.Model):
    nome  = models.CharField(max_length=100,unique=True, help_text="Nome da modalidade (Ex: Judô, Jiu Jitsu.)")
    descricao = models.TextField(blank=True,null=True, help_text="Uma breve descrição da modalidade.")
-   utiliza_faixas = models.BooleanField(default=False, verdose_name="Utiliza Faixas") 
+   utiliza_faixas = models.BooleanField(default=False, verbose_name="Utiliza Faixas") 
 
    def __str__(self):
        return self.nome
    
 # NOV MODELO : PLANO
-class Plano(models.Model):utiliza
+class Plano(models.Model):
    nome = models.CharField(max_length=100, unique=True, verbose_name="Nome do Plano")
    valor = models.DecimalField(max_digits=8, decimal_places=2, verbose_name="Valor Mensal")
    duracao_meses = models.IntegerField(default=1, verbose_name="Duração (meses)") 
     
-    def __str__(self):
+   def __str__(self):
        return f"{self.nome} - R${self.valor}/mês"
    
 # NOVO MODELO: FAIXA
@@ -39,7 +39,7 @@ class Aluno(models.Model):
     data_nascimento = models.DateField(verbose_name="Data de Nascimento")
     telefone = models.CharField(max_length=20, blank=True, null=True, verbose_name="Telefone")
     email = models.EmailField(max_length=255, unique=True, verbose_name="E-mail")
-    data_matricula = models.DateField(defeult=timezone.now, verbose_name="Data da Matrícula")
+    data_matricula = models.DateField(default=timezone.now, verbose_name="Data da Matrícula")
     plano = models.ForeignKey(Plano, on_delete=models.SET_NULL, null=True, blank=True, related_name="alunos",verbose_name="Plano Atual")
 
     def __str__(self):
