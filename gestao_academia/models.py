@@ -40,7 +40,9 @@ class Aluno(models.Model):
     telefone = models.CharField(max_length=20, blank=True, null=True, verbose_name="Telefone")
     email = models.EmailField(max_length=255, unique=True, verbose_name="E-mail")
     data_matricula = models.DateField(default=timezone.now, verbose_name="Data da Matrícula")
-    plano = models.ForeignKey(Plano, on_delete=models.SET_NULL, null=True, blank=True, related_name="alunos",verbose_name="Plano Atual")
+    plano = models.ForeignKey(Plano, on_delete=models.SET_NULL, null=True, blank=True, related_name="alunos", verbose_name="Plano Atual")
+    foto = models.ImageField(upload_to='fotos_alunos/', blank=True, null=True, verbose_name="Foto")
+    modalidades = models.ManyToManyField(Modalidade, through='MatriculaModalidade', related_name="alunos")
 
     def __str__(self):
         return self.name_completo

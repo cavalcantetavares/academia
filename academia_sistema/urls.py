@@ -1,19 +1,4 @@
-"""
-URL configuration for academia_sistema project.
-
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/5.2/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
-"""
+# academia_sistema/urls.py
 
 from django.contrib import admin
 from django.urls import path, include
@@ -22,20 +7,20 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 urlpatterns = [
+    # URLs do Admin e da Página Inicial
     path('admin/', admin.site.urls),
     path('', contas_views.pagina_inicial, name='pagina_inicial'),
+
+    # Inclui as URLs do app de Contas
     path('contas/', include('contas.urls')),
     path('contas/', include('django.contrib.auth.urls')),
 
-    # --- CORREÇÃO FINAL ---
-    # A única linha para o nosso novo app deve ser esta.
-    # Ela diz ao Django para procurar as URLs de gestão no outro ficheiro.
+    # Inclui as URLs do app de Gestão
     path('gestao/', include('gestao_academia.urls')),
 ]
 
-# Adicione esta linha ao final do ficheiro
-# Isto serve os ficheiros de média apenas em modo de desenvolvimento (DEBUG=True)
-
+# Configuração para servir ficheiros de média em desenvolvimento
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
 

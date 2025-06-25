@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+
+{% block title %}Detalhes do Aluno {% endblock %}
+
+{% block content %}
+
+<div class="card">
+    <div class="card-header">
+       <h2>{{ aluno.nome_completo }}</h2>  
+    </div>
+    <div class="card-boy">
+        <div class="row">
+            <div class="col-md-4">
+                {% if aluno.foto %}
+                    <img src="{{ aluno.foto.url}}" alt="Foto de {{ aluno.nome_completo}}" class="img-fluid rounded">
+                {% else %} 
+                    <div class="bg-secondary text-white text-center p-5 rounded">Sem Foto</div>
+                {% endif %}       
+            </div>
+            <div class="col-md-8">
+                <p><strong>Email:</strong> {{ aluno.email}}</p>
+                <p><strong>Telefone:</strong> {{ aluno.telefone|default:"Não Informado"}}</p>
+                <p><strong>Data de Nascimento:</strong>{{ aluno.data_nascimento|date:"d/m/Y"}}</p>
+                <p><strong>Plano Atual:</strong>{{ aluno.nome|default:"Nenhum" }}</p>
+                <p><strong>Data da Matrícula</strong>{{ aluno.data_matricula|date:"d/m/y" }}</p>
+
+            </div>
+        </div>
+    </div>    
+
+</div>
+
+
+{% endblock %}

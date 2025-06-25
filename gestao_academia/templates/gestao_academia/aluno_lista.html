@@ -1,0 +1,28 @@
+{% extends "base.html"%}
+{% block title %}Lista de Alunos {% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between aling-items-center mb-4">
+    <h1>Alunos Registrados</h1>
+    <a href="{% url 'aluno_criar' %}" class="btn btn-primary">Registrar Novo Aluno</a>
+</div>
+<div class="card">
+    <div class="card-body">
+        <ul class="list-group list-group-flush">
+            {% for aluno in aluno %}
+            <li class="list-group-item d-flex justify-content-between aling-items-center">
+                <a href="{% url 'aluno_detalhe' pk=aluno.pk %}">{{ aluno.nome_completo}}</a>
+                <div>
+                    <a href="{% url 'aluno_editar' pk=aluno.pk %}" class="btn btn-sm btn-outline-secondary  me-2">Editar</a>
+                    <a href="{% url 'aluno_apagar' pk=aluno.pk %}" class="btn btn-sm btn-outline-danger">Apagar</a>
+                </div>
+            </li>
+            {% empty %}
+            <li class="list-group-item">Nenhum aluno registrado.</li>
+            {% endfor %}
+        </ul>
+
+    </div>
+
+</div>
+{% endblock %}

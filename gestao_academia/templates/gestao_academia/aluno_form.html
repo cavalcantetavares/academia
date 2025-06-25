@@ -1,0 +1,29 @@
+{% extends 'base.html'%}
+
+{% block title %}{{ titulo }}{% endblock %}
+
+{% block content %}
+
+<div class="row justufy-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h2>{{ titulo }}</h2>
+            </div>
+            <div class="card-body">
+                <!-- enctype é essencial para o upload de ficheiros -->
+                <form method="post" enctype="multipart/form-data" >
+                    {% csrf_token %}
+                    {{ form.as_p}}
+                    <div class="mt-4">
+                        <button type="submit" class="btn btn-success">Salvar</button>
+                        <a href="{% url 'lista_alunos'%}" class="btn btn-secondary">Cancelar</a>
+                    </div>
+                </form> 
+            </div>
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}
