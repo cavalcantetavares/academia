@@ -1,29 +1,74 @@
 {% extends 'base.html'%}
 
-{% block title %}{{ titulo }}{% endblock %}
+{%  block title %}{{ titulo }}{% endblock %}
+
 
 {% block content %}
-
-<div class="row justufy-content-center">
+<div class="row justify-content-center">
     <div class="col-md-8">
         <div class="card">
             <div class="card-header">
                 <h2>{{ titulo }}</h2>
             </div>
             <div class="card-body">
-                <!-- enctype é essencial para o upload de ficheiros -->
-                <form method="post" enctype="multipart/form-data" >
+                <form method="post" enctype="multipart/form-data">
                     {% csrf_token %}
-                    {{ form.as_p}}
+                    {{ form.as_p }}
                     <div class="mt-4">
                         <button type="submit" class="btn btn-success">Salvar</button>
-                        <a href="{% url 'lista_alunos'%}" class="btn btn-secondary">Cancelar</a>
+                        <a href="{% url 'lista_alunos' %}" class="btn btn-secondary">Cancelar</a>
                     </div>
-                </form> 
+                </form>
             </div>
         </div>
-
     </div>
 </div>
+{% endblock %}
 
+{% block extra_js %}
+<script>
+    // Adiciona um "ouvinte" ao campo CEP. Sempre que o foco sair do campo, esta função é chamada.
+    document.getElementById('cep').addEventListener('blur', function() {
+        const cep = this.value.replace(/\D/g, ''); // Remove tudo o que não for número
+
+        if (cep.length === 8) {
+            // Bloqueia os campos de endereço enquanto procuramos
+            document.getElementById('rua').disabled = true;
+            document.getElementById('bairro').disabled = true;
+            document.getElementById('cidade').disabled = true;
+            document.getElementById('uf').disabled = true;
+
+            // Faz a chamada à API ViaCEP
+            fetch(`https://viacep.com.br/ws/${cep}/json/`)
+                .then(response => response.json()) // Converte a resposta para formato JSON
+                .then(data => {
+                    if (!data.erro) {
+                        // Se o CEP for encontrado, preenche os campos
+                        document.getElementById('rua').value = data.logradouro;
+                        document.getElementById('bairro').value = data.bairro;
+                        document.getElementById('cidade').value = data.localidade;
+                        document.getElementById('uf').value = data.uf;
+                    } else {
+                        // Se o CEP não for encontrado, limpa os campos
+                        alert("CEP não encontrado.");
+                        document.getElementById('rua').value = '';
+                        document.getElementById('bairro').value = '';
+                        document.getElementById('cidade').value = '';
+                        document.getElementById('uf').value = '';
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro ao buscar CEP:', error);
+                    alert("Não foi possível buscar o CEP. Tente novamente.");
+                })
+                .finally(() => {
+                    // Desbloqueia os campos de endereço, independentemente do resultado
+                    document.getElementById('rua').disabled = false;
+                    document.getElementById('bairro').disabled = false;
+                    document.getElementById('cidade').disabled = false;
+                    document.getElementById('uf').disabled = false;
+                });
+        }
+    });
+</script>
 {% endblock %}

@@ -8,8 +8,8 @@ class MatriculaModalidadeInline(admin.TabularInline):
 
 @admin.register(Aluno)
 class AlunoAdmin(admin.ModelAdmin):
-    list_display = ('nome_completo', 'email', 'telefone', 'plano')
-    search_fields = ('nome_completo', 'email')
+    list_display = ('nome_completo', 'email', 'telefone', 'plano','cpf','cidade')
+    search_fields = ('nome_completo', 'email','cpf')
     list_filter = ('plano',)
     inlines = [MatriculaModalidadeInline]
 

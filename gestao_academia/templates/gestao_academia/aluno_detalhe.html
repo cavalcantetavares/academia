@@ -4,31 +4,51 @@
 
 {% block content %}
 
-<div class="card">
-    <div class="card-header">
-       <h2>{{ aluno.nome_completo }}</h2>  
+<div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h2>{{ aluno.nome_completo }}</h2>
+        <a href="{% url 'aluno_editar' pk=aluno.pk %}" class="btn btn-secondary">Editar Dados Pessoais</a>
     </div>
-    <div class="card-boy">
+    <div class="card-body">
         <div class="row">
             <div class="col-md-4">
                 {% if aluno.foto %}
-                    <img src="{{ aluno.foto.url}}" alt="Foto de {{ aluno.nome_completo}}" class="img-fluid rounded">
-                {% else %} 
-                    <div class="bg-secondary text-white text-center p-5 rounded">Sem Foto</div>
-                {% endif %}       
+                    <img src="{{ aluno.foto.url }}" alt="Foto de {{ aluno.nome_completo }}" class="img-fluid rounded">
+                {% else %}
+                    <div class="bg-secondary text-white text-center p-5 rounded d-flex align-items-center justify-content-center">Sem Foto</div>
+                {% endif %}
             </div>
             <div class="col-md-8">
-                <p><strong>Email:</strong> {{ aluno.email}}</p>
-                <p><strong>Telefone:</strong> {{ aluno.telefone|default:"Não Informado"}}</p>
-                <p><strong>Data de Nascimento:</strong>{{ aluno.data_nascimento|date:"d/m/Y"}}</p>
-                <p><strong>Plano Atual:</strong>{{ aluno.nome|default:"Nenhum" }}</p>
-                <p><strong>Data da Matrícula</strong>{{ aluno.data_matricula|date:"d/m/y" }}</p>
-
+                <!-- CAMPO CPF ADICIONADO AQUI -->
+                <p><strong>CPF:</strong> {{ aluno.cpf|default:"Não informado" }}</p>
+                
+                <p><strong>Email:</strong> {{ aluno.email }}</p>
+                <p><strong>Telefone:</strong> {{ aluno.telefone|default:"Não informado" }}</p>
+                <p><strong>Data de Nascimento:</strong> {{ aluno.data_nascimento|date:"d/m/Y" }}</p>
+                
+                <!-- CAMPO RESPONSÁVEL ADICIONADO AQUI (COM CONDIÇÃO) -->
+                {% if aluno.responsavel %}
+                    <p><strong>Responsável:</strong> {{ aluno.responsavel }}</p>
+                {% endif %}
+                <p><strong>CEP:</strong> {{ aluno.cep|default:"Não informado" }}</p>
+                <p><strong>Rua:</strong> {{ aluno.rua|default:"Não informada" }}, Nº {{ aluno.numero|default:"S/N" }}</p>
+                <p><strong>Bairro:</strong> {{ aluno.bairro|default:"Não informado" }}</p>
+                <p><strong>Cidade/Estado:</strong> {{ aluno.cidade|default:"Não informada" }} - {{ aluno.estado|default:"--" }}</p>
+                {% if aluno.complemento %}
+                    <p><strong>Complemento:</strong> {{ aluno.complemento }}</p>
+                {% endif %}
+                <p><strong>Plano Atual:</strong> {{ aluno.plano.nome|default:"Nenhum" }}</p>
+                <p><strong>Data da Matrícula:</strong> {{ aluno.data_matricula|date:"d/m/Y" }}</p>
             </div>
         </div>
-    </div>    
+    </div>
+</div>
+<!-- NOVA SECÇÃO PARA MATRÍCULAS E FAIXAS -->
+
+<div class="card">
+    <div>
+
+    </div>
 
 </div>
-
-
 {% endblock %}
