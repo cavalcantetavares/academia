@@ -114,3 +114,25 @@ def matricula_criar(request, aluno_pk):
         'titulo': f'Nova Matrícula para {aluno.nome_completo}'
     }
     return render(request, 'gestao_academia/matricula_form.html', contexto)
+
+# --- NOVA VIEW PARA O DASHBOARD ---
+
+@login_required
+def dashboard(request):
+    # Calcula as estatísticas
+    total_alunos = Aluno.objects.count()
+    total_planos = Plano.objects.count()
+    total_modalidade = Modalidade.objects.count()
+  
+    # Busca os últimos 5 alunos registrados
+    ultimos_alunos = Aluno.objects.order_by('-data_matricula')[:5]
+
+    contexto = {
+        'total_alunos' : total_alunos,
+        'total_planos' : total_planos,
+        'total_modalidades' : total_modalidade,
+        'ultimos_alunos' : ultimos_alunos,
+        'titulo' : 'Dashboard'
+    }
+    return render(request, 'gestao_academia/dashboard.html', contexto)
+

@@ -4,6 +4,12 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
+    # NOVA ROTA PARA O DASHBOARD
+
+    path('dashboard/', views.dashboard, name='dashboard'),
+
+
+
     # URLs de Modalidades
     path('modalidades/', views.lista_modalidades, name='lista_modalidades'),
     path('modalidades/nova/', views.criar_modalidade, name='criar_modalidade'),

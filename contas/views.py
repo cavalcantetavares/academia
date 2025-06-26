@@ -21,5 +21,5 @@ def registrar(request):
     return render(request, 'contas/registrar.html', {'form': form})
 
 # A view pagina_inicial continua igual
-def pagina_inicial(request):
-    return render(request, 'pagina_inicial.html')
+#def pagina_inicial(request):
+#    return render(request, 'pagina_inicial.html')

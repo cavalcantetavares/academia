@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+
+{% block title %} {{ titulo }} {% endblock %}
+
+
+{% block content %}
+<h1 class="mb-4">Dashboard</h1>
+
+<!-- Secção de Estatísticas -->
+<div class="row">
+   <div class="col-md-4 mb-4">
+      <div class="card text-white bg-primary h-100">
+        <div class="card-body">
+            <h5 class="card-title">Total de Alunos</h5>
+            <p class="card-text fs-1">{{ total_alunos}}</p>
+        </div>
+      </div>
+   </div>
+   <div class="col-md-4 mb-4">
+       <div class="card text-white bg-success h-100">
+            <div class="card-body">
+                <h5 class="card-title">Planos Ativos</h5>
+                <p class="card-text fs-1">{{ total_planos }}</p>
+            </div>
+        </div> 
+   </div> 
+   <div class="col-md-4 mb-4">
+       <div class="card text-white bg-success h-100">
+            <div class="card-body">
+                <h5 class="card-title">Modalidades Oferecidas</h5>
+                <p class="card-text fs-1">{{ total_modalidades }}</p>
+            </div>
+        </div> 
+   </div> 
+</div>
+<!-- Secção de Últimos Alunos Registados -->
+ <div class="card">
+    <div class="card-header">
+        <h3 >Últimos Alunos Registrados</h3>
+    </div>
+    <div class="card-body">
+        <ul class="list-group list-group-flush">
+            {% for aluno in ultimos_alunos %}
+                <li class="list-group-item">
+                    <a href="{% url 'aluno_detalhe' pk=aluno.pk%}">{{ aluno.nome_completo }}</a>
+                    <span class="text-muted float-end">
+                        Registrados em: {{ aluno.data_matricula|date:"d/m/Y"}}
+                    </span>    
+                </li>
+            {% empty %}
+                <li class="list-group-item">Nenhum aluno registrado ainda.</li>  
+            {% endfor %}       
+        </ul>
+    </div>
+    <div class="card-footer text-center">
+        <a href="{% url 'lista_alunos' %}">Ver todos os alunos</a>
+    </div>    
+ </div>
+ {% endblock %}
+

@@ -2,6 +2,7 @@
 
 from django.contrib import admin
 from django.urls import path, include
+from gestao_academia import views as gestao_views 
 from contas import views as contas_views
 from django.conf import settings
 from django.conf.urls.static import static
@@ -9,7 +10,8 @@ from django.conf.urls.static import static
 urlpatterns = [
     # URLs do Admin e da Página Inicial
     path('admin/', admin.site.urls),
-    path('', contas_views.pagina_inicial, name='pagina_inicial'),
+     # A NOSSA NOVA PÁGINA INICIAL É O DASHBOARD
+    path('', gestao_views.dashboard, name='dashboard'),
 
     # Inclui as URLs do app de Contas
     path('contas/', include('contas.urls')),
