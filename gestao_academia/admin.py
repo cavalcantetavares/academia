@@ -10,8 +10,15 @@ class MatriculaModalidadeInline(admin.TabularInline):
 class AlunoAdmin(admin.ModelAdmin):
     list_display = ('nome_completo', 'email', 'telefone', 'plano','cpf','cidade')
     search_fields = ('nome_completo', 'email','cpf')
-    list_filter = ('plano',)
+    list_filter = ('plano','cidade')
     inlines = [MatriculaModalidadeInline]
+     # Cria um "campo" personalizado para a área de admin
+    def get_idade_display(self, obj):
+       idade = obj.get_idade()
+       return f"{idade} anos" if idade is not None else "N/A"
+    # Define um nome para a nova coluna
+    get_idade_display.short_description = 'Idade'
+
 
 @admin.register(Modalidade)
 class ModalidadeAdmin(admin.ModelAdmin):

@@ -2,11 +2,10 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from .models import Modalidade, Aluno
-from .forms import ModalidadeForm, AlunoForm
+from .models import Modalidade, Aluno, MatriculaModalidade, Plano, Faixa # Importações dos modelos
+from .forms import ModalidadeForm, AlunoForm, MatriculaModalidadeForm # Importações dos formulários
 
 # --- VIEWS PARA MODALIDADES ---
-
 @login_required
 def lista_modalidades(request):
     modalidades = Modalidade.objects.all()
@@ -46,9 +45,7 @@ def apagar_modalidade(request, pk):
         return redirect('lista_modalidades')
     return render(request, 'gestao_academia/modalidade_confirm_delete.html', {'modalidade': modalidade})
 
-
 # --- VIEWS PARA ALUNOS ---
-
 @login_required
 def lista_alunos(request):
     alunos = Aluno.objects.all().order_by('nome_completo')
@@ -92,3 +89,28 @@ def aluno_apagar(request, pk):
         messages.success(request, 'Aluno apagado com sucesso!')
         return redirect('lista_alunos')
     return render(request, 'gestao_academia/aluno_confirm_delete.html', {'aluno': aluno})
+
+# --- VIEW PARA MATRÍCULAS ---
+@login_required
+def matricula_criar(request, aluno_pk):
+    aluno = get_object_or_404(Aluno, pk=aluno_pk)
+    if request.method == 'POST':
+        form = MatriculaModalidadeForm(request.POST)
+        if form.is_valid():
+            matricula = form.save(commit=False)
+            matricula.aluno = aluno
+            matricula.save()
+            messages.success(request, f'Matrícula em {matricula.modalidade.nome} adicionada com sucesso!')
+            return redirect('aluno_detalhe', pk=aluno_pk)
+    else:
+        form = MatriculaModalidadeForm()
+    
+    modalidades_atuais_pks = aluno.matriculamodalidade_set.values_list('modalidade__pk', flat=True)
+    form.fields['modalidade'].queryset = Modalidade.objects.exclude(pk__in=modalidades_atuais_pks)
+
+    contexto = {
+        'form': form,
+        'aluno': aluno,
+        'titulo': f'Nova Matrícula para {aluno.nome_completo}'
+    }
+    return render(request, 'gestao_academia/matricula_form.html', contexto)

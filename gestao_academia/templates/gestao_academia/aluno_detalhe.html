@@ -25,7 +25,11 @@
                 <p><strong>Email:</strong> {{ aluno.email }}</p>
                 <p><strong>Telefone:</strong> {{ aluno.telefone|default:"Não informado" }}</p>
                 <p><strong>Data de Nascimento:</strong> {{ aluno.data_nascimento|date:"d/m/Y" }}</p>
-                
+
+                <!-- LINHA ADICIONADA PARA EXIBIR A IDADE -->
+                 
+               <p><strong>Idade:</strong> {{ aluno.get_idade }} anos</p>
+
                 <!-- CAMPO RESPONSÁVEL ADICIONADO AQUI (COM CONDIÇÃO) -->
                 {% if aluno.responsavel %}
                     <p><strong>Responsável:</strong> {{ aluno.responsavel }}</p>
@@ -46,9 +50,29 @@
 <!-- NOVA SECÇÃO PARA MATRÍCULAS E FAIXAS -->
 
 <div class="card">
-    <div>
-
+    <div class="card-header d-flex justify-content-between aling-item-center">
+        <h3>Matrículas em Modalidade</h3>
+        <!-- Este é o link que causava o erro. Vamos criar a sua URL agora. -->
+         <a href="{% url 'matricula_criar' aluno_pk=aluno.pk %}" class="btn btn-primary">Adicionar Matrícula </a>
     </div>
+    <div class="card-body">
+        {% if aluno.matriculamodalidade_set.all %}
+            <ul class="list-group">
+                {% for matricula in aluno.matriculamodalidade_set.all %}
+                    <li class='list-group-item d-flex justify-content-between align-items-center'>
+                        <div >
+                            <strong>{{ matricula.modalidade.nome}}</strong><br>
+                            <small class="text-muted">Faixa:{{ matricula.faixa.nome|default:"Nenhuma faixa atribuída"}}</small>
+                        </div>
+                    </li>
+                {% endfor %}
+
+            </ul>
+        {% else %}
+            <p>Este aluno não está matriculado em nenhuma modalidade.</p>
+        {% endif %}
+    </div>
+    
 
 </div>
 {% endblock %}

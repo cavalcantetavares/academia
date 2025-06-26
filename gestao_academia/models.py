@@ -54,6 +54,27 @@ class Aluno(models.Model):
         # O erro anterior foi um erro de digitação aqui.
         # O nome do campo é 'nome_completo' (com underscore).
         return self.nome_completo
+    
+ # --- NOVO MÉTODO PARA CALCULAR A IDADE ---
+def get_idade(self):
+        print("--- A DEPURAR O MÉTODO get_idade ---") # Linha de Debug 1
+        print(f"Aluno: {self.nome_completo}") # Linha de Debug 2
+        print(f"Data de Nascimento no DB: {self.data_nascimento}") # Linha de Debug 3
+        print(f"Tipo da Data de Nascimento: {type(self.data_nascimento)}") # Linha de Debug 4
+
+        if self.data_nascimento:
+            hoje = date.today()
+            idade = hoje.year - self.data_nascimento.year - ((hoje.month, hoje.day) < (self.data_nascimento.month, self.data_nascimento.day))
+            print(f"Cálculo da idade: {idade}") # Linha de Debug 5
+            return idade
+
+        print("Nenhuma data de nascimento encontrada. A retornar None.") # Linha de Debug 6
+        return None # Retorna None se não houver data de nascimento
+
+
+
+
+
 
 class MatriculaModalidade(models.Model):
    aluno = models.ForeignKey(Aluno, on_delete=models.CASCADE)
