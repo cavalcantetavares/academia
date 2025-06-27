@@ -4,6 +4,8 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from .models import Modalidade, Aluno, MatriculaModalidade, Plano, Faixa # Importações dos modelos
 from .forms import ModalidadeForm, AlunoForm, MatriculaModalidadeForm # Importações dos formulários
+from .models import Pagamento
+from .forms import Pagamentoform
 
 # --- VIEWS PARA MODALIDADES ---
 @login_required
@@ -136,3 +138,34 @@ def dashboard(request):
     }
     return render(request, 'gestao_academia/dashboard.html', contexto)
 
+# --- VIEWS PARA PAGAMENTOS ---
+@login_required
+def registar_pagamento(request, aluno_pk):
+    aluno = get_object_or_404(Aluno, pk=aluno_pk)
+    if request.method == 'POST':
+        form = PagamentoForm(request.POST)
+        if form.is_valid():
+            pagamento = form.save(commint=False)
+            pagamento.aluno = aluno
+            pagamento.save()
+            messages.success(request, 'Pagamento registrado com sucesso!')
+            return redirect('aluno_detalhe', pk=aluno.pk)
+        
+        else:
+            # Preenche o formulário com o valor do plano do aluno como sugestão
+            form = PagamentoForm(initial={'valor': aluno.plano.valor})
+
+        contexto = {
+            'form': form,
+            'aluno': aluno,
+            'titulo':f'Registar Pagamento para {aluno.nome_completo}'
+        }
+        return render(request, 'gestao_academia/pagamento_form.html', contexto)
+@login_required
+def list_pagamento(request):
+    pagamentos = Pagamento.objects.all()
+    contexto = {
+        'pagamentos': pagamentos,
+        'titulo': 'Histórico de Pagamentos'
+    }
+    return render(request, 'gestao_academia/pagamento_lista.html', contexto)        

@@ -87,3 +87,28 @@ class MatriculaModalidade(models.Model):
 
    def __str__(self):
       return f"{self.aluno.nome_completo} em {self.modalidade.nome}"
+   
+
+ # NOVO MODELO: PAGAMENTO
+   
+class Pagamento(models.Model):
+    FORMAS_PAGAMENTO = [
+        ('PIX', 'PIX'),
+        ('DIN', 'Dinheiro'),
+        ('CC', 'Cartão de Crédito'),
+        ('CD', 'Cartão de Débito'),
+        ('TRA', 'Transferência Bancária'),
+    ]
+
+    aluno = models.ForeignKey(Aluno, on_delete=models.CASCADE, related_name="pagamentos")
+    valor = models.DecimalField(max_digits=8, decimal_places=2, verbose_name="Valor Pago")
+    data_pagamento = models.DateField(default=timezone.now, verbose_name="Data do Pagamento")
+    mes_referencia = models.DateField(verbose_name="Mês de Referêrencia")
+    forma_pagamento = models.CharField(max_length=3, choices=FORMAS_PAGAMENTO, verbose_name="Forma de Pagamento")
+
+    class Meta:
+        ordering = ['-data_pagamento', '-mes_referencia']
+
+    def __str__(self):
+        return f"Pagamento de {self.aluno.nome_completo} - R$ {self.valor} em {self.data_pagamento.strftime('%d/%m/%Y')}"
+    

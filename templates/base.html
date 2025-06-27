@@ -9,23 +9,31 @@
 </head>
 <body class="bg-light">
     <!-- Menu de Navegação (Navbar) do Bootstrap -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+ <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
     <div class="container-fluid">
+        <!-- CORREÇÃO: O link do logo deve sempre apontar para o 'dashboard'. -->
+        <!-- O sistema de login do Django irá redirecionar para o login se o utilizador não estiver autenticado. -->
         <a class="navbar-brand" href="{% url 'dashboard' %}">Academia</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
             <!-- Links alinhados à esquerda -->
-           
-            <ul class="navbar-nav me-auto mb-2 mb-1g-0">
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'lista_modalidades' %}">Modalidades</a>
-                </li>
-            <!-- NOVO LINK PARA ALUNOS -->
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'lista_alunos' %}">Alunos</a>
-                </li> 
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                {% if user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'dashboard' %}">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'lista_alunos' %}">Alunos</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'lista_modalidades' %}">Modalidades</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'lista_pagamentos' %}">Financeiro</a>
+                    </li>
+                {% endif %}
             </ul>
 
             <!-- Links alinhados à direita -->
@@ -45,7 +53,7 @@
                         <a class="nav-link" href="{% url 'login' %}">Login</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'registrar' %}">Registrar</a>
+                        <a class="nav-link" href="{% url 'registrar' %}">Registar</a>
                     </li>
                 {% endif %}
             </ul>

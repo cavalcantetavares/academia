@@ -3,6 +3,7 @@ from django import forms
 from datetime import date
 # Importações corretas dos modelos necessários
 from .models import Modalidade, Aluno, Plano, Faixa, MatriculaModalidade
+from .models import Pagamento
 
 
 
@@ -62,4 +63,22 @@ class MatriculaModalidadeForm(forms.ModelForm):
         fields = ['modalidade', 'faixa']
         widgets = {
             'modalidade': forms.Select(attrs={'class': 'form-select'}),
+        }
+
+# NOVO FORMULÁRIO PARA PAGAMENTOS
+class Pagamentoform(forms.ModelForm):
+    mes_referencia = forms.DateField(
+        label="Mês de Referência",
+        widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control'})
+    )
+    data_pagamento = forms.DateField(
+        label = "Data do Pagamento",
+        widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control'})
+    )
+    class Meta:
+        model = Pagamento
+        fields = ['valor', 'mes_referencia', 'data_pagamento', 'forma_pagamento']
+        widgets = {
+            'valor': forms.NumberInput(attrs={'class': 'form_pagamento'}),
+            'forma_pagamento': forms.Select(attrs={'class': 'form-select'}),
         }

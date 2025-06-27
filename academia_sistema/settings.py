@@ -126,7 +126,7 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-LOGIN_REDIRECT_URL = '/'  # Redireciona para a página inicial ( DEFINIDA POR NAME= 'pagina_inicial' )
+LOGIN_REDIRECT_URL = '/dashboar/'  # Redireciona para a página inicial ( DEFINIDA POR NAME= 'pagina_inicial' )
 LOGIN_REDIRECT_URL = '/'  #rEDIRECIONA PARA A PAGINA INICIAL APOS LOGOUT
 
 
