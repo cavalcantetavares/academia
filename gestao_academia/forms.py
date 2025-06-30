@@ -66,7 +66,7 @@ class MatriculaModalidadeForm(forms.ModelForm):
         }
 
 # NOVO FORMULÁRIO PARA PAGAMENTOS
-class Pagamentoform(forms.ModelForm):
+class PagamentoForm(forms.ModelForm):
     mes_referencia = forms.DateField(
         label="Mês de Referência",
         widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control'})

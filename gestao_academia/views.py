@@ -5,8 +5,8 @@ from django.contrib import messages
 from .models import Modalidade, Aluno, MatriculaModalidade, Plano, Faixa # Importações dos modelos
 from .forms import ModalidadeForm, AlunoForm, MatriculaModalidadeForm # Importações dos formulários
 from .models import Pagamento
-from .forms import Pagamentoform
-
+from .forms import PagamentoForm
+from django.core.paginator import Paginator
 # --- VIEWS PARA MODALIDADES ---
 @login_required
 def lista_modalidades(request):
@@ -139,33 +139,68 @@ def dashboard(request):
     return render(request, 'gestao_academia/dashboard.html', contexto)
 
 # --- VIEWS PARA PAGAMENTOS ---
-@login_required
 def registar_pagamento(request, aluno_pk):
     aluno = get_object_or_404(Aluno, pk=aluno_pk)
+
+    # --- CORREÇÃO ---
+    # O erro 'UnboundLocalError' acontece se o formulário for inválido.
+    # Definimos o 'contexto' aqui no início para que ele sempre exista.
+    contexto = {
+        'aluno': aluno,
+        'titulo': f'Registar Pagamento para {aluno.nome_completo}'
+    }
+
     if request.method == 'POST':
         form = PagamentoForm(request.POST)
         if form.is_valid():
-            pagamento = form.save(commint=False)
+            pagamento = form.save(commit=False)
             pagamento.aluno = aluno
             pagamento.save()
-            messages.success(request, 'Pagamento registrado com sucesso!')
+            messages.success(request, 'Pagamento registado com sucesso!')
             return redirect('aluno_detalhe', pk=aluno.pk)
-        
-        else:
-            # Preenche o formulário com o valor do plano do aluno como sugestão
-            form = PagamentoForm(initial={'valor': aluno.plano.valor})
+    else:
+        # Preenche o formulário com o valor do plano do aluno como sugestão
+        form = PagamentoForm(initial={'valor': aluno.plano.valor if aluno.plano else 0})
 
-        contexto = {
-            'form': form,
-            'aluno': aluno,
-            'titulo':f'Registar Pagamento para {aluno.nome_completo}'
-        }
-        return render(request, 'gestao_academia/pagamento_form.html', contexto)
+    # Adiciona o formulário (seja ele novo ou com erros) ao contexto
+    contexto['form'] = form
+
+    return render(request, 'gestao_academia/pagamento_form.html', contexto)
+
 @login_required
-def list_pagamento(request):
-    pagamentos = Pagamento.objects.all()
+def lista_pagamentos(request):
+     # Começa com todos os pagamentos, ordenados pelos mais recentes
+    queryset = Pagamento.objects.all().order_by('-data_pagamento')
+     # --- LÓGICA DE PESQUISA E FILTRO ---
+    termo_pesquisa = request.GET.get('pesquisa','')
+    data_inicio =request.GET.get('data_inicio','')
+    data_fim = request.GET.get('data_fim','') 
+
+    if termo_pesquisa:
+       # Filtra por nome do aluno que contenha o termo de pesquisa (icontains não diferencia maiúsculas/minúsculas)
+       queryset = queryset.filter(aluno__nome_completo__icontains=termo_pesquisa)
+    
+    if data_inicio:
+       # Filtra pagamentos feitos a partir da data de início (gte = greater than or equal)    
+       queryset = queryset.filter(data_pagamento__gte=data_inicio)
+
+    if data_fim:
+        # Filtra pagamentos feitos até à data de fim (lte = less than or equal)
+        queryset = queryset.filter(data_pagamento__lte=data_fim)
+
+ # --- LÓGICA DE PAGINAÇÃO ---
+    paginador = Paginator(queryset,10) # Mostra 10 pagamentos por página
+    pagina_num = request.GET.get('pagina')
+    pagina_obj = paginador.get_page(pagina_num)
+
     contexto = {
-        'pagamentos': pagamentos,
-        'titulo': 'Histórico de Pagamentos'
+        # Em vez de 'pagamentos', enviamos o 'pagina_obj' que contém os itens da página atual
+        'pagina_obj':pagina_obj,
+        'titulo':'Histórico de Pagamentos',
+        # Enviamos os termos de pesquisa de volta para os manter nos campos do formulário
+        'termo_pesquisa': termo_pesquisa,
+        'data_inicio' : data_inicio,
+        'data_fim' : data_fim,
+
     }
-    return render(request, 'gestao_academia/pagamento_lista.html', contexto)        
+    return render(request, 'gestao_academia/pagamento_lista.html', contexto)

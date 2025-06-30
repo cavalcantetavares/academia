@@ -12,9 +12,15 @@
             <div class="card-body">
                 <form method="post">
                     {% csrf_token %}
+
+                    {# --- CORREÇÃO --- #}
+                    {# Voltamos a usar form.as_p para garantir que todos os campos, #}
+                    {# incluindo o 'select' de forma de pagamento, são renderizados corretamente. #}
+                    {# O nosso ficheiro forms.py já adiciona as classes do Bootstrap. #}
                     {{ form.as_p }}
+
                     <div class="mt-4">
-                        <button type="button" class="btn btn-success">Salvar Pagamento</button>
+                        <button type="submit" class="btn btn-success">Salvar Pagamento</button>
                         <a href="{% url 'aluno_detalhe' pk=aluno.pk %}" class="btn btn-secondary">Cancelar</a>
                     </div>
                 </form>

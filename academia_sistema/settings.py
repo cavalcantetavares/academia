@@ -126,9 +126,9 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-LOGIN_REDIRECT_URL = '/dashboar/'  # Redireciona para a página inicial ( DEFINIDA POR NAME= 'pagina_inicial' )
-LOGIN_REDIRECT_URL = '/'  #rEDIRECIONA PARA A PAGINA INICIAL APOS LOGOUT
-
+LOGIN_REDIRECT_URL = '/dashboard/'  # Redireciona para a página inicial ( DEFINIDA POR NAME= 'pagina_inicial' )
+  #rEDIRECIONA PARA A PAGINA INICIAL APOS LOGOUT
+LOGOUT_REDIRECT_URL = 'login'
 
 # Configuração de Ficheiros de Média (uploads dos utilizadores)
 MEDIA_URL = '/media/'
