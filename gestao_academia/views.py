@@ -7,6 +7,8 @@ from .forms import ModalidadeForm, AlunoForm, MatriculaModalidadeForm # Importa�
 from .models import Pagamento
 from .forms import PagamentoForm
 from django.core.paginator import Paginator
+from .models import Instrutor, Turma
+from .forms import InstrutorForm, TurmaForm
 # --- VIEWS PARA MODALIDADES ---
 @login_required
 def lista_modalidades(request):
@@ -204,3 +206,57 @@ def lista_pagamentos(request):
 
     }
     return render(request, 'gestao_academia/pagamento_lista.html', contexto)
+
+# --- VIEWS PARA INSTRUTORES ---
+@login_required
+def lista_instrutores(request):
+    instrutores = Instrutor.objects.all().order_by('nome')
+    return render(request, 'gestao_academia/instrutor_lista.html', {'instrutores': instrutores})  
+
+@login_required
+def instrutor_criar(request):
+    if request.method == 'POST':
+        form = InstrutorForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Instrutor registrado com sucesso!')
+            return redirect('lista_instrutores')  
+    else:
+        form = InstrutorForm()
+        return render(request, 'gestao_academia/instrutor_form.html',{'form' : form, 'titulo':'Registrar novo Instrutor'})  
+
+# (Views para editar e apagar instrutor podem ser adicionadas aqui, seguindo o mesmo padrão)
+
+
+# --- VIEWS PARA TURMAS/HORÁRIOS ---
+
+@login_required
+def grade_horarios(request):
+    turmas = Turma.objects.all()
+    # Organiza as turmas por dia da semana para exibir na grade
+    dias_com_turmas = {}
+    for dia_num, dia_nome in Turma.DIAS_SEMANA:
+        turmas_do_dia = turmas.filter(dia_da_semana=dia_num)
+        if turmas_do_dia:
+            dias_com_turmas[dia_nome] = turmas_do_dia
+
+    return render(request,'gestao_academia/grade_horarios.html', {'dias_com_turmas': dias_com_turmas})        
+
+
+
+@login_required
+def turma_criar(request):
+    if request.method == 'POST':
+        form = TurmaForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Turma criada com sucesso')
+        return redirect('grade_horarios')
+    
+    else:
+        form = TurmaForm()
+    return render(request, 'gestao_academia/turma_form.html', {'form': form, 'titulo': 'Criar Nova Turma'})    
+
+# --- NOVAS VIEWS PARA EDITAR E APAGAR TURMA ---
+@login_required
+def  

@@ -30,4 +30,11 @@ urlpatterns = [
     path('pagamentos/', views.lista_pagamentos, name='lista_pagamentos'),
     path('alunos/<int:aluno_pk>/pagamento/', views.registar_pagamento, name='registar_pagamento'),
 
+    # URLs de Instrutores
+    path('instrutores/', views.lista_instrutores, name='lista_instrutores' ),
+    path('instrutores/novo/', views.instrutor_criar, name='instrutor_criar'),
+
+    # URLs de Turmas
+    path('horarios/', views.grade_horarios, name='grade_horarios'),
+    path('horarios/nova', views.turma_criar, name='turma_criar'),
 ]

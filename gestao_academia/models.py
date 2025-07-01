@@ -30,6 +30,15 @@ class Faixa(models.Model):
    def __str__(self):
      return f"{self.modalidade.nome} - {self.nome}"
 
+# NOVO MODELO: INSTRUTOR
+class Instrutor(models.Model):
+    nome = models.CharField(max_length= 255, verbose_name="Nome do Instrutor")  
+    telefone = models.CharField(max_length=20, blank=True, null=True, verbose_name="Telefone")
+    email = models.EmailField(max_length=255, unique=True, blank=True, null=True, verbose_name="E-mail") 
+
+    def __str__(self):
+        return self.nome      
+
 class Aluno(models.Model):
     nome_completo = models.CharField(max_length=255, verbose_name="Nome Completo")
     cpf = models.CharField(max_length=14, unique=True, verbose_name="CPF", help_text="Formato: 000.000.000-00", null=True)
@@ -112,3 +121,32 @@ class Pagamento(models.Model):
     def __str__(self):
         return f"Pagamento de {self.aluno.nome_completo} - R$ {self.valor} em {self.data_pagamento.strftime('%d/%m/%Y')}"
     
+
+# NOVO MODELO: TURMA
+class Turma(models.Model):
+    DIAS_SEMANA = [
+        (1,'Segunda-Feira'),
+        (2, 'Terça-Feira'),
+        (3, 'Quarta-Feira'),
+        (4, 'Quinta-Feira'),
+        (5,'Sexta-Feira'),
+        (6, 'Sabado'),
+        (7, 'Domingo'),
+    ]
+
+    modalidade = models.ForeignKey(Modalidade, on_delete=models.CASCADE, related_name="turmas")
+    instrutor = models.ForeignKey(Instrutor, on_delete=models.SET_NULL, null=True, blank=True, related_name="turmas")
+    dia_da_semana = models.IntegerField(choices=DIAS_SEMANA, verbose_name="Dia da Semana")
+    horario_inicio = models.TimeField(verbose_name="Horário  de Início")
+    horario_fim = models.TimeField(verbose_name="Horário Fim")
+    max_alunos = models.PositiveIntegerField(verbose_name="Máximo de Alunos")
+
+class Meta:
+    ordering = ['dia_da_semana', 'Horario_inincio'] 
+    verbose_name = "Turma / Horário"
+    verbose_name_plural = "Turmas / Horários"
+
+def __str__(self):
+    return f"{self.modalida.nome} com {self.instrutor.nome if self.instrutor else 'a definir'} - {self.get_dia_da_semana_display()} ({self.horario_inicio.strftime('%H:%M')}-{self.horario_fim.strftime('%H:%M')})"
+    
+

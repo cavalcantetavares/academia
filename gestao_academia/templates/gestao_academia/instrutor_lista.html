@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block title %}Lista de Instrutor{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Instrutores Registrados</h1>
+    <a href="{% url 'instrutor_criar' %}" class="btn btn-primary">Registrar Novo Instrutor</a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <ul class="list-group list-group-flush">
+            {% for instrutor in instrutores %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                {{ instrutor.nome }}
+                <small class="text-muted">{{ instrutor.email|default_if_none:"" }}</small>
+                <div>
+                    {# Futuramente, podemos adicionar botões de editar/apagar aqui #}
+                    {# <a href="#" class="btn btn-sm btn-outline-secondary me-2">Editar</a> #}
+                    {# <a href="#" class="btn btn-sm btn-outline-danger">Apagar</a> #}
+                </div>
+            </li>
+            {% empty %}
+            <li class="list-group-item">Nenhum instrutor registado.</li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+{% endblock %}

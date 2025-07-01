@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ titulo }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h2>
+                    {{ titulo }}
+                </h2>               
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    {{ form.as_p}}
+                    <div class="mt-4">
+                        <button type="submit" class="btn btn-success">Salvar Instrutor</button>
+                        <a href="{% url 'lista_instrutores' %}" class="btn btn-secondary">Cancelar</a>
+                    </div>
+
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

@@ -33,9 +33,15 @@
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'lista_pagamentos' %}">Financeiro</a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'lista_instrutores' %}">Instrutores</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'grade_horarios' %}">Horários</a>
+                    </li>
                 {% endif %}
             </ul>
-
+            
             <!-- Links alinhados à direita -->
             <ul class="navbar-nav ms-auto">
                 {% if user.is_authenticated %}

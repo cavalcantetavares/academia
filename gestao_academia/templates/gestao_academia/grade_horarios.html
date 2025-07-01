@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block title %}Grade de Horário {% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Grade de Horários</h1>
+    <a href="{% url 'turma_criar' %}" class="btn btn-primary">Adicionar Turma</a>
+</div>
+
+{% for dia, turmas_do_dia in dias_com_turmas.items %}
+    <h3 class="mt-4">{{ dia }}</h3>
+    <div class="list-group">
+        {% for turma in turmas_do_dia %}
+            <div class="list-group-item">
+                <strong>{{ turma.horario_inicio|time:"H:i" }} - {{ turma.horario_fim|time:"H:i" }}</strong>: 
+                {{ turma.modalidade.nome }} com {{ turma.instrutor.nome|default:"-" }}
+                <span class="float-end text-muted">Vagas: {{ turma.max_alunos }}</span>
+            </div>
+        {% endfor %}
+    </div>
+{% empty %}
+    <div class="alert alert-info">Nenhuma turma registrada ainda.</div>
+{% endfor %}
+{% endblock %}

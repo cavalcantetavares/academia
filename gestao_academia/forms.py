@@ -4,6 +4,7 @@ from datetime import date
 # Importações corretas dos modelos necessários
 from .models import Modalidade, Aluno, Plano, Faixa, MatriculaModalidade
 from .models import Pagamento
+from .models import Instrutor, Turma
 
 
 
@@ -82,3 +83,30 @@ class PagamentoForm(forms.ModelForm):
             'valor': forms.NumberInput(attrs={'class': 'form_pagamento'}),
             'forma_pagamento': forms.Select(attrs={'class': 'form-select'}),
         }
+
+# NOVO FORMULÁRIO PARA INSTRUTORES
+class InstrutorForm(forms.ModelForm):
+    class Meta:
+        model = Instrutor
+        fields = ['nome', 'email', 'telefone']
+        widgets = {
+            'nome' : forms.TextInput(attrs={'class': 'form-control'}),
+            'telefone' : forms.TextInput(attrs={'class': 'form-control'}),
+            'email' : forms.EmailInput(attrs={'class': 'form-control'}),
+        }        
+# NOVO FORMULÁRIO PARA TURMAS
+class TurmaForm(forms.ModelForm):
+    class Meta:
+        model = Turma
+        fields = ['modalidade', 'instrutor', 'dia_da_semana', 'horario_inicio', 'horario_fim', 'max_alunos']
+        widgets = {
+            'modalidade' :  forms.Select(attrs={'class': 'form-select'}),
+            'instrutor' : forms.Select(attrs={'class': 'form-select'}),
+            'dia_da_semana' : forms.Select(attrs={'class': 'form-select'}),
+            'horario_inicio' : forms.TimeInput(attrs={'type': 'time', 'class': 'form-control'}),
+            'horario_fim' : forms.TimeInput(attrs={'type': 'time', 'class': 'form-control'}),
+            'max_alunos' : forms.NumberInput(attrs={'class': 'form-control'}),
+
+        }
+
+
