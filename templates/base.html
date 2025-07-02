@@ -53,14 +53,14 @@
                             {% csrf_token %}
                             <button type="submit" class="btn btn-danger">Sair</button>
                         </form>
-                    </li>
+                    </li>-
                 {% else %}
-                    <li class="nav-item">
+                   <!-- <li class="nav-item">
                         <a class="nav-link" href="{% url 'login' %}">Login</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'registrar' %}">Registar</a>
-                    </li>
+                    </li>-->
                 {% endif %}
             </ul>
         </div>
