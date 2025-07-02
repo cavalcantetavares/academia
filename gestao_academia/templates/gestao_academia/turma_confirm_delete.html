@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block title %}Confirmar Exclusão{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card border-danger">
+            <div class="card-header bg-danger text-white">
+                <h2 class="card-title">Confirmar Exclusão</h2>
+            </div>
+            <div class="card-body">
+                <p>Tem a certeza que deseja apagar a turma de <strong>{{ turma.modalidade.nome }}</strong> às <strong>{{ turma.horario_inicio|time:"H:i" }}</strong>?</p>
+                <p class="text-danger">Esta ação não pode ser desfeita.</p>
+                <form method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Sim, apagar</button>
+                    <a href="{% url 'grade_horarios' %}" class="btn btn-secondary">Cancelar</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

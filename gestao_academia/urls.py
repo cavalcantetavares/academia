@@ -33,8 +33,13 @@ urlpatterns = [
     # URLs de Instrutores
     path('instrutores/', views.lista_instrutores, name='lista_instrutores' ),
     path('instrutores/novo/', views.instrutor_criar, name='instrutor_criar'),
+    path('instrutores/<int:pk>/editar/', views.instrutor_editar, name='instrutor_editar'),
+    path('instrutores/<int:pk>/apagar/', views.instrutor_apagar, name='instrutor_apagar'),
 
     # URLs de Turmas
     path('horarios/', views.grade_horarios, name='grade_horarios'),
     path('horarios/nova', views.turma_criar, name='turma_criar'),
+    path('horarios/<int:pk>/editar/', views.turma_editar, name='turma_editar'),
+    path('horarios/<int:pk>/apagar/', views.turma_apagar, name='turma_apagar'),
+
 ]

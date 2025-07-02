@@ -16,9 +16,8 @@
                 {{ instrutor.nome }}
                 <small class="text-muted">{{ instrutor.email|default_if_none:"" }}</small>
                 <div>
-                    {# Futuramente, podemos adicionar botões de editar/apagar aqui #}
-                    {# <a href="#" class="btn btn-sm btn-outline-secondary me-2">Editar</a> #}
-                    {# <a href="#" class="btn btn-sm btn-outline-danger">Apagar</a> #}
+                    <a href="{% url 'instrutor_editar' pk=instrutor.pk %}" class="btn btn-sm btn-outline-secondary me-2">Editar</a>
+                    <a href="{% url 'instrutor_apagar' pk=instrutor.pk %}" class="btn btn-sm btn-outline-danger">Apagar</a>
                 </div>
             </li>
             {% empty %}

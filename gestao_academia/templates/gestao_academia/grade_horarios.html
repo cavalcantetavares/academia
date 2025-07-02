@@ -16,6 +16,10 @@
                 <strong>{{ turma.horario_inicio|time:"H:i" }} - {{ turma.horario_fim|time:"H:i" }}</strong>: 
                 {{ turma.modalidade.nome }} com {{ turma.instrutor.nome|default:"-" }}
                 <span class="float-end text-muted">Vagas: {{ turma.max_alunos }}</span>
+                <div>
+                    <a href="{% url 'turma_editar' pk=turma.pk %}" class="btn btn-sm btn-outline-secondary">Editar</a>
+                    <a href="{% url 'turma_apagar' pk=turma.pk %}" class="btn btn-sm btn-outline-danger ms-2">Apagar</a>
+                </div>
             </div>
         {% endfor %}
     </div>

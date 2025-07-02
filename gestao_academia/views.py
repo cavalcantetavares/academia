@@ -9,6 +9,10 @@ from .forms import PagamentoForm
 from django.core.paginator import Paginator
 from .models import Instrutor, Turma
 from .forms import InstrutorForm, TurmaForm
+from datetime import date  # Importa a ferramenta de data
+from .models import Aluno, Plano, Modalidade, Turma
+
+
 # --- VIEWS PARA MODALIDADES ---
 @login_required
 def lista_modalidades(request):
@@ -130,12 +134,18 @@ def dashboard(request):
   
     # Busca os últimos 5 alunos registrados
     ultimos_alunos = Aluno.objects.order_by('-data_matricula')[:5]
+    # --- NOVA LÓGICA PARA AS TURMAS DO DIA ---
+    hoje = date.today()
+    # O método isoweekday() retorna 1 para Segunda, 2 para Terça, etc.
+    dia_semana_hoje = hoje.isoweekday()
+    turmas_hoje = Turma.objects.filter(dia_da_semana=dia_semana_hoje).order_by('horario_inicio')
 
     contexto = {
         'total_alunos' : total_alunos,
         'total_planos' : total_planos,
         'total_modalidades' : total_modalidade,
         'ultimos_alunos' : ultimos_alunos,
+        'turmas_hoje' : turmas_hoje,
         'titulo' : 'Dashboard'
     }
     return render(request, 'gestao_academia/dashboard.html', contexto)
@@ -223,9 +233,32 @@ def instrutor_criar(request):
             return redirect('lista_instrutores')  
     else:
         form = InstrutorForm()
-        return render(request, 'gestao_academia/instrutor_form.html',{'form' : form, 'titulo':'Registrar novo Instrutor'})  
+        return render(request, 'gestao_academia/instrutor_form.html',{'form' : form, 'titulo':'Registrar novo Instrutor'}) 
 
-# (Views para editar e apagar instrutor podem ser adicionadas aqui, seguindo o mesmo padrão)
+@login_required
+def instrutor_editar(request, pk):
+    instrutor = get_object_or_404(Instrutor, pk=pk)
+    if request.method == 'POST':
+        form = InstrutorForm(request.POST, instance=instrutor)
+        if form.is_valid():
+            form.save()
+            messages.success(request,'Dados do instrutor atualizados com sucesso')
+            return redirect('lista_instrutores')
+    else:
+        form = InstrutorForm(instance=instrutor)
+    return render(request, 'gestao_academia/instrutor_form.html',{'form':form, 'titulo':'Editar Instrutor'})
+
+@login_required
+def instrutor_apagar(request, pk):
+    instrutor = get_object_or_404(Instrutor, pk=pk)
+    if request.method == 'POST':
+        instrutor.delete()
+        messages.success(request, 'Instrutor removido com sucesso!')
+        return redirect('lista_instrutores')
+    return render(request, 'gestao_academia/instrutor_confirma_delete.html', {'instrutor': instrutor})    
+
+
+
 
 
 # --- VIEWS PARA TURMAS/HORÁRIOS ---
@@ -258,5 +291,27 @@ def turma_criar(request):
     return render(request, 'gestao_academia/turma_form.html', {'form': form, 'titulo': 'Criar Nova Turma'})    
 
 # --- NOVAS VIEWS PARA EDITAR E APAGAR TURMA ---
+
 @login_required
-def  
+def turma_editar(request,pk):
+    turma = get_object_or_404(Turma, pk=pk)
+    if request.method == 'POST':
+       form = TurmaForm(request.POST, instance=turma)
+       if form.is_valid():
+          form.save()
+          messages.success(request,'Turma atualizada com secusso!')
+          return redirect('grade_horarios')
+
+    else:
+        form = TurmaForm(instance=turma)
+    return render(request, 'gestao_academia/turma_form.html', {'form': form, 'titulo': 'Editar Turma'}) 
+
+@login_required
+def turma_apagar(request, pk):
+    turma = get_object_or_404(Turma, pk=pk)
+    if request.method == 'POST':
+        turma.delete()
+        messages.success(request, 'Turma apagada com suscesso!')
+        return redirect('grade_horarios')
+    return render(request, 'gestao_academia/turma_confirm_delete.html',{'turma': turma})                
+           
