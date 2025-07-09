@@ -1,28 +1,56 @@
 {% extends "base.html"%}
+{% load i18n %}
 {% block title %}Lista de Alunos {% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between aling-items-center mb-4">
-    <h1>Alunos Registrados</h1>
-    <a href="{% url 'aluno_criar' %}" class="btn btn-primary">Registrar Novo Aluno</a>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Alunos Registados</h1>
+    <a href="{% url 'aluno_criar' %}" class="btn btn-primary">Registar Novo Aluno</a>
 </div>
+
 <div class="card">
     <div class="card-body">
-        <ul class="list-group list-group-flush">
-            {% for aluno in alunos %}
-            <li class="list-group-item d-flex justify-content-between aling-items-center">
-                <a href="{% url 'aluno_detalhe' pk=aluno.pk %}">{{ aluno.nome_completo}}</a>
-                <div>
-                    <a href="{% url 'aluno_editar' pk=aluno.pk %}" class="btn btn-sm btn-outline-secondary  me-2">Editar</a>
-                    <a href="{% url 'aluno_apagar' pk=aluno.pk %}" class="btn btn-sm btn-outline-danger">Apagar</a>
-                </div>
-            </li>
-            {% empty %}
-            <li class="list-group-item">Nenhum aluno registrado.</li>
-            {% endfor %}
-        </ul>
-
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>Matrícula</th>
+                    <th>Nome Completo</th>
+                    <th>Plano</th>
+                    <th>Status Mensalidade ({{ "now"|date:"F" }})</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {# --- CORREÇÃO DEFINITIVA --- #}
+                {# O erro estava aqui. A variável enviada pela view chama-se 'alunos' (no plural). #}
+                {% for aluno in alunos %}
+                <tr>
+                    <td>{{ aluno.pk }}</td>
+                    <td>
+                        <a href="{% url 'aluno_detalhe' pk=aluno.pk %}">{{ aluno.nome_completo }}</a>
+                    </td>
+                    <td>{{ aluno.plano.nome|default:"-" }}</td>
+                    <td>
+                        {% with status=aluno.get_status_mensalidade %}
+                            {% if status == "Paga" %}
+                                <span class="badge bg-success">Paga</span>
+                            {% else %}
+                                <span class="badge bg-danger">Pendente</span>
+                            {% endif %}
+                        {% endwith %}
+                    </td>
+                    <td>
+                        <a href="{% url 'aluno_editar' pk=aluno.pk %}" class="btn btn-sm btn-outline-secondary">Editar</a>
+                        <a href="{% url 'registar_pagamento' aluno_pk=aluno.pk %}" class="btn btn-sm btn-outline-success ms-2">Pagar</a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="text-center">Nenhum aluno registado.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
-
 </div>
 {% endblock %}

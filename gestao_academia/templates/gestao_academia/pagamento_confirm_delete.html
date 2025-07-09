@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}Confirmar Exclusão de Pagamento{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card border-danger">
+            <div class="card-header bg-danger text-white">
+                <h2 class="card-title">Confirmar Exclusão</h2>
+            </div>
+            <div class="card-body">
+                <p>Tem a certeza que deseja apagar o seguinte pagamento?</p>
+                <ul class="list-group mb-3">
+                    <li class="list-group-item"><strong>Aluno:</strong> {{ pagamento.aluno.nome_completo }}</li>
+                    <li class="list-group-item"><strong>Valor:</strong> R$ {{ pagamento.valor|floatformat:2 }}</li>
+                    <li class="list-group-item"><strong>Mês de Referência:</strong> {{ pagamento.mes_referencia|date:"F/Y" }}</li>
+                </ul>
+                <p class="text-danger">Esta ação não pode ser desfeita.</p>
+                <form method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Sim, apagar</button>
+                    <a href="{% url 'aluno_detalhe' pk=aluno.pk %}" class="btn btn-secondary">Cancelar</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

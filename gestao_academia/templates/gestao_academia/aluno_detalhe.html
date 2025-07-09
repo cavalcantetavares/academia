@@ -74,25 +74,33 @@
         {% endif %}
     </div>
     <div class="card mt-4">
-    <div class="card-header">
-        <h3>Histórico de Pagamentos</h3>
+        <div class="card-header">
+            <h3>Histórico de Pagamentos</h3>
+        </div>
+        <div class="card-body">
+            {% if aluno.pagamentos.all %}
+                <ul class="list-group">
+                    {% for pgto in aluno.pagamentos.all %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                Pagamento de <strong>R$ {{ pgto.valor|floatformat:2 }}</strong> referente a <strong>{{ pgto.mes_referencia|date:"F/Y" }}</strong>.
+                                <br>
+                                <small class="text-muted">Realizado em {{ pgto.data_pagamento|date:"d/m/Y" }} via {{ pgto.get_forma_pagamento_display }}</small>
+                            </div>
+                            <!-- NOVO BOTÃO DE APAGAR -->
+                            <div>
+                                <a href="{% url 'pagamento_apagar' pk=pgto.pk %}" class="btn btn-sm btn-outline-danger">
+                                    Apagar
+                                </a>
+                            </div>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>Nenhum pagamento registado para este aluno.</p>
+            {% endif %}
+        </div>
     </div>
-    <div class="card-body">
-        {% if aluno.pagamentos.all %}
-            <ul class="list-group">
-                {% for pgto in aluno.pagamentos.all %}
-                    <li class="list-group-item">
-                        Pagamento de <strong>R$ {{ pgto.valor }}</strong> referente a <strong>{{ pgto.mes_referencia|date:"F/Y" }}</strong>.
-                        <br>
-                        <small class="text-muted">Realizado em {{ pgto.data_pagamento|date:"d/m/Y" }} via {{ pgto.get_forma_pagamento_display }}</small>
-                    </li>
-                {% endfor %}
-            </ul>
-        {% else %}
-            <p>Nenhum pagamento registado para este aluno.</p>
-        {% endif %}
-    </div>
-</div>
 
 </div>
 

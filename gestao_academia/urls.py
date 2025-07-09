@@ -29,6 +29,7 @@ urlpatterns = [
     # URLs de Pagamentos
     path('pagamentos/', views.lista_pagamentos, name='lista_pagamentos'),
     path('alunos/<int:aluno_pk>/pagamento/', views.registar_pagamento, name='registar_pagamento'),
+    path('pagamentos/<int:pk>/apagar/', views.pagamento_apagar,name='pagamento_apagar'),
 
     # URLs de Instrutores
     path('instrutores/', views.lista_instrutores, name='lista_instrutores' ),
