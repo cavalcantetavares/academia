@@ -25,6 +25,8 @@ urlpatterns = [
 
      # URL de Matrículas
     path('alunos/<int:aluno_pk>/matricular/', views.matricula_criar, name='matricula_criar'),
+    path('matriculas/<int:pk>/editar/', views.matricula_editar, name='matricula_editar'),
+    path('matriculas/<int:pk>/apagar/', views.matricula_apagar, name='matricula_apagar'),
 
     # URLs de Pagamentos
     path('pagamentos/', views.lista_pagamentos, name='lista_pagamentos'),
@@ -42,5 +44,8 @@ urlpatterns = [
     path('horarios/nova', views.turma_criar, name='turma_criar'),
     path('horarios/<int:pk>/editar/', views.turma_editar, name='turma_editar'),
     path('horarios/<int:pk>/apagar/', views.turma_apagar, name='turma_apagar'),
+
+    # URL para a chamada AJAX
+    path('ajax/carregar-turmas/', views.carregar_turmas, name='ajax_carregar_turmas'),
 
 ]

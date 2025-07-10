@@ -26,5 +26,43 @@
     </div>
 
 </div>
+<script>
+    const modalidadeSelect = document.getElementById('id_modalidade');
+    const turmaSelect = document.getElementById('id_turma');
+    const faixaSelect = document.getElementById('id_faixa');
+
+    function carregarOpcoes(modalidadeId) {
+        // Limpa as opções atuais
+        turmaSelect.innerHTML = '<option value="">---------</option>';
+        faixaSelect.innerHTML = '<option value="">---------</option>';
+
+        if (modalidadeId) {
+            // Busca as turmas
+            fetch(`/gestao/ajax/carregar-turmas/?modalidade_id=${modalidadeId}`)
+                .then(response => response.json())
+                .then(data => {
+                    data.forEach(function(turma) {
+                        const option = new Option(turma.display, turma.id);
+                        turmaSelect.add(option);
+                    });
+                });
+
+            // (Opcional, mas recomendado) Criar uma view e URL para carregar faixas dinamicamente
+            // Por agora, o formulário mostrará todas as faixas.
+        }
+    }
+
+    // Adiciona o "ouvinte" para quando o utilizador muda a modalidade
+    modalidadeSelect.addEventListener('change', function() {
+        carregarOpcoes(this.value);
+    });
+
+    // Executa a função uma vez no carregamento da página para o caso de estarmos a editar
+    // e a modalidade já vier selecionada.
+    if (modalidadeSelect.value) {
+        carregarOpcoes(modalidadeSelect.value);
+    }
+</script>
+
 
 {% endblock %}

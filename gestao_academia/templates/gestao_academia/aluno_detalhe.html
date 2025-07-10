@@ -63,7 +63,15 @@
                     <li class='list-group-item d-flex justify-content-between align-items-center'>
                         <div >
                             <strong>{{ matricula.modalidade.nome}}</strong><br>
+                            {% if matricula.turma %}
+                                <span class="badge bg-segundary">{{ matricula.turma}}</span>
+                            {% endif %}    
                             <small class="text-muted">Faixa:{{ matricula.faixa.nome|default:"Nenhuma faixa atribuída"}}</small>
+                        </div>
+                         <!-- NOVOS BOTÕES DE AÇÃO -->
+                        <div>
+                            <a href="{% url 'matricula_editar' pk=matricula.pk %}" class="btn btn-sm btn-outline-secondary">Editar</a>
+                            <a href="{% url 'matricula_apagar' pk=matricula.pk %}" class="btn btn-sm btn-outline-danger ms-2">Apagar</a>
                         </div>
                     </li>
                 {% endfor %}

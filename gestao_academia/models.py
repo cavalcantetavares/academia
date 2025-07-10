@@ -3,6 +3,8 @@ from django.db import models
 from django.utils import timezone
 from datetime import date
 
+# A ordem das classes é importante. Definimos primeiro as classes que não dependem de outras.
+
 class Modalidade(models.Model):
     nome = models.CharField(max_length=100, unique=True, help_text="Nome da modalidade (ex: Musculação, Pilates, Jiu-Jitsu)")
     descricao = models.TextField(blank=True, null=True, help_text="Uma breve descrição da modalidade.")
@@ -39,6 +41,27 @@ class Faixa(models.Model):
     def __str__(self):
         return f"{self.modalidade.nome} - {self.nome}"
 
+# A classe Turma precisa de ser definida ANTES de ser usada em MatriculaModalidade.
+class Turma(models.Model):
+    DIAS_SEMANA = [
+        (1, 'Segunda-feira'), (2, 'Terça-feira'), (3, 'Quarta-feira'),
+        (4, 'Quinta-feira'), (5, 'Sexta-feira'), (6, 'Sábado'), (7, 'Domingo'),
+    ]
+    modalidade = models.ForeignKey(Modalidade, on_delete=models.CASCADE, related_name="turmas")
+    instrutor = models.ForeignKey(Instrutor, on_delete=models.SET_NULL, null=True, blank=True, related_name="turmas")
+    dia_da_semana = models.IntegerField(choices=DIAS_SEMANA, verbose_name="Dia da Semana")
+    horario_inicio = models.TimeField(verbose_name="Horário de Início")
+    horario_fim = models.TimeField(verbose_name="Horário de Fim")
+    max_alunos = models.PositiveIntegerField(verbose_name="Máximo de Alunos")
+
+    class Meta:
+        ordering = ['dia_da_semana', 'horario_inicio']
+        verbose_name = "Turma / Horário"
+        verbose_name_plural = "Turmas / Horários"
+
+    def __str__(self):
+        return f"{self.modalidade.nome} com {self.instrutor.nome if self.instrutor else 'a definir'} - {self.get_dia_da_semana_display()} ({self.horario_inicio.strftime('%H:%M')}-{self.horario_fim.strftime('%H:%M')})"
+
 class Aluno(models.Model):
     nome_completo = models.CharField(max_length=255, verbose_name="Nome Completo")
     cpf = models.CharField(max_length=14, unique=True, verbose_name="CPF", help_text="Formato: 000.000.000-00", null=True, blank=True)
@@ -69,25 +92,22 @@ class Aluno(models.Model):
 
     def get_status_mensalidade(self):
         hoje = date.today()
-        pagamento_mes_atual = self.pagamentos.filter(
-            mes_referencia__year=hoje.year,
-            mes_referencia__month=hoje.month
-        ).exists()
+        pagamento_mes_atual = self.pagamentos.filter(mes_referencia__year=hoje.year, mes_referencia__month=hoje.month).exists()
         if pagamento_mes_atual:
             return "Paga"
         else:
             return "Pendente"
-        
- # --- NOVO MÉTODO PARA ENCONTRAR O ÚLTIMO PAGAMENTO ---
+
     def get_ultimo_mes_pago(self):
-        ultimo_pagamento = self.pagamento.order_by('-mes_referencia').first()
+        ultimo_pagamento = self.pagamentos.order_by('-mes_referencia').first()
         if ultimo_pagamento:
             return ultimo_pagamento.mes_referencia
-        return None      
+        return None
 
 class MatriculaModalidade(models.Model):
     aluno = models.ForeignKey(Aluno, on_delete=models.CASCADE)
     modalidade = models.ForeignKey(Modalidade, on_delete=models.CASCADE)
+    turma = models.ForeignKey(Turma, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Turma/Horário")
     faixa = models.ForeignKey(Faixa, on_delete=models.SET_NULL, null=True, blank=True)
     data_inicio = models.DateField(default=timezone.now)
 
@@ -113,32 +133,3 @@ class Pagamento(models.Model):
 
     def __str__(self):
         return f"Pagamento de {self.aluno.nome_completo} - R$ {self.valor} em {self.data_pagamento.strftime('%d/%m/%Y')}"
-
-# --- CORREÇÃO ---
-# O erro 'ImportError' foi causado porque a definição da classe Turma estava em falta.
-# Adicione a classe abaixo ao seu ficheiro models.py.
-class Turma(models.Model):
-    DIAS_SEMANA = [
-        (1, 'Segunda-feira'),
-        (2, 'Terça-feira'),
-        (3, 'Quarta-feira'),
-        (4, 'Quinta-feira'),
-        (5, 'Sexta-feira'),
-        (6, 'Sábado'),
-        (7, 'Domingo'),
-    ]
-
-    modalidade = models.ForeignKey(Modalidade, on_delete=models.CASCADE, related_name="turmas")
-    instrutor = models.ForeignKey(Instrutor, on_delete=models.SET_NULL, null=True, blank=True, related_name="turmas")
-    dia_da_semana = models.IntegerField(choices=DIAS_SEMANA, verbose_name="Dia da Semana")
-    horario_inicio = models.TimeField(verbose_name="Horário de Início")
-    horario_fim = models.TimeField(verbose_name="Horário de Fim")
-    max_alunos = models.PositiveIntegerField(verbose_name="Máximo de Alunos")
-
-    class Meta:
-        ordering = ['dia_da_semana', 'horario_inicio']
-        verbose_name = "Turma / Horário"
-        verbose_name_plural = "Turmas / Horários"
-
-    def __str__(self):
-        return f"{self.modalidade.nome} com {self.instrutor.nome if self.instrutor else 'a definir'} - {self.get_dia_da_semana_display()} ({self.horario_inicio.strftime('%H:%M')}-{self.horario_fim.strftime('%H:%M')})"

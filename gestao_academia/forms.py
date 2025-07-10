@@ -2,7 +2,7 @@
 from django import forms
 from datetime import date
 # Importações corretas dos modelos necessários
-from .models import Modalidade, Aluno, Plano, Faixa, MatriculaModalidade
+from .models import Modalidade, Aluno, Plano, Faixa, Turma, MatriculaModalidade
 from .models import Pagamento
 from .models import Instrutor, Turma
 
@@ -51,21 +51,18 @@ class AlunoForm(forms.ModelForm):
                 self.add_error('responsavel', 'O nome do responsável é obrigatório para menores de 18 anos.')
         return cleaned_data
 
-class MatriculaModalidadeForm(forms.ModelForm):
-    faixa = forms.ModelChoiceField(
-        queryset=Faixa.objects.all().order_by('modalidade__nome', 'ordem'),
-        required=False,
-        widget=forms.Select(attrs={'class': 'form-select'}),
-        label="Faixa"
-    )
+# Matricula Modalidade Formulário
 
+class MatriculaModalidadeForm(forms.ModelForm):
     class Meta:
         model = MatriculaModalidade
-        fields = ['modalidade', 'faixa']
+        fields = ['modalidade', 'turma', 'faixa'] 
         widgets = {
             'modalidade': forms.Select(attrs={'class': 'form-select'}),
+            'turma': forms.Select(attrs={'class': 'form-select'}),
+            'faixa': forms.Select(attrs={'class': 'form-select'}),
         }
-
+            
 # NOVO FORMULÁRIO PARA PAGAMENTOS
 class PagamentoForm(forms.ModelForm):
     mes_referencia = forms.DateField(
