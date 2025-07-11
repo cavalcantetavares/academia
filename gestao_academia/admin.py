@@ -1,6 +1,7 @@
 # gestao_academia/admin.py
 from django.contrib import admin
-from .models import Modalidade, Plano, Faixa, Aluno, MatriculaModalidade
+# Garanta que todos os modelos estão a ser importados
+from .models import Modalidade, Plano, Faixa, Aluno, MatriculaModalidade, Instrutor, Turma
 
 class MatriculaModalidadeInline(admin.TabularInline):
     model = MatriculaModalidade
@@ -8,22 +9,19 @@ class MatriculaModalidadeInline(admin.TabularInline):
 
 @admin.register(Aluno)
 class AlunoAdmin(admin.ModelAdmin):
-    list_display = ('nome_completo', 'email', 'telefone', 'plano','cpf','cidade')
-    search_fields = ('nome_completo', 'email','cpf')
-    list_filter = ('plano','cidade')
+    list_display = ('nome_completo', 'email', 'telefone', 'plano')
+    search_fields = ('nome_completo', 'email')
+    list_filter = ('plano',)
     inlines = [MatriculaModalidadeInline]
-     # Cria um "campo" personalizado para a área de admin
-    def get_idade_display(self, obj):
-       idade = obj.get_idade()
-       return f"{idade} anos" if idade is not None else "N/A"
-    # Define um nome para a nova coluna
-    get_idade_display.short_description = 'Idade'
-
 
 @admin.register(Modalidade)
 class ModalidadeAdmin(admin.ModelAdmin):
     list_display = ('nome', 'utiliza_faixas')
     list_filter = ('utiliza_faixas',)
 
+# --- CORREÇÃO ---
+# Adicionamos o registo de Instrutor e Turma que estava em falta.
 admin.site.register(Plano)
 admin.site.register(Faixa)
+admin.site.register(Instrutor)
+admin.site.register(Turma)

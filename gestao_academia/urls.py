@@ -47,5 +47,6 @@ urlpatterns = [
 
     # URL para a chamada AJAX
     path('ajax/carregar-turmas/', views.carregar_turmas, name='ajax_carregar_turmas'),
+    path('ajax/carregar-faixas/', views.carregar_faixas, name='ajax_carregar_faixas'),
 
 ]

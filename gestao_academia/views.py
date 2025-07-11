@@ -13,6 +13,7 @@ from .forms import (
     ModalidadeForm, AlunoForm, MatriculaModalidadeForm, 
     PagamentoForm, InstrutorForm, TurmaForm
 )
+from django.http import JsonResponse
 
 @login_required
 def dashboard(request):
@@ -347,5 +348,13 @@ def carregar_turmas(request):
             'id': turma.id,
             'display': srt(turma) # Usa o __str__ do modelo para um texto descritivo
         })
-    return  JsonResponse(turmas_list, safe=False)    
-    
+    return  JsonResponse(turmas_lista, safe=False)    
+
+# --- NOVA VIEW PARA CARREGAR FAIXAS ---
+def carregar_faixas(request):
+    modalidade_id = request.GET.get('modalidade_id')
+    # Busca as faixas que pertencem à modalidade selecionada
+    faixas = Faixa.objects.filter(modalidade_id=modalidade_id).order_by('ordem')
+    # Formata os dados para serem enviados como JSON
+    faixas_list = list(faixas.values('id', 'nome'))
+    return JsonResponse(faixas_list, safe=False)

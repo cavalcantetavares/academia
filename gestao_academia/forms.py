@@ -58,10 +58,26 @@ class MatriculaModalidadeForm(forms.ModelForm):
         model = MatriculaModalidade
         fields = ['modalidade', 'turma', 'faixa'] 
         widgets = {
-            'modalidade': forms.Select(attrs={'class': 'form-select'}),
-            'turma': forms.Select(attrs={'class': 'form-select'}),
-            'faixa': forms.Select(attrs={'class': 'form-select'}),
+            'modalidade': forms.Select(attrs={'class': 'form-select', 'id': 'id_modalidade'}),
+            'turma': forms.Select(attrs={'class': 'form-select', 'id': 'id_turma'}),
+            'faixa': forms.Select(attrs={'class': 'form-select', 'id': 'id_faixa'}),
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Começamos com os campos de turma e faixa vazios.
+        # Eles serão preenchidos pelo JavaScript.
+        self.fields['turma'].queryset = Turma.objects.none()
+        self.fields['faixa'].queryset = Faixa.objects.none()
+
+        # Se estamos a editar uma matrícula que já existe
+        if 'instance' in kwargs and kwargs['instance'].pk:
+            instance = kwargs['instance']
+            if instance.modalidade:
+                # Preenchemos as opções de turma e faixa com base na modalidade já guardada.
+                self.fields['turma'].queryset = Turma.objects.filter(modalidade=instance.modalidade).order_by('dia_da_semana', 'horario_inicio')
+                self.fields['faixa'].queryset = Faixa.objects.filter(modalidade=instance.modalidade).order_by('ordem')
+
             
 # NOVO FORMULÁRIO PARA PAGAMENTOS
 class PagamentoForm(forms.ModelForm):
