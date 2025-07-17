@@ -8,77 +8,81 @@
     <div class="col-md-8">
         <div class="card">
             <div class="card-header">
-                <h2>
-                    {{ titulo }}
-                </h2>               
+                <h2>Matricular {{ aluno.nome_completo }}</h2>
             </div>
             <div class="card-body">
                 <form method="post">
                     {% csrf_token %}
-                    {{ form.as_p}}
+                    {{ form.as_p }}
                     <div class="mt-4">
-                        <button type="submit" class="btn btn-success">Salvar Matricula</button>
+                        <button type="submit" class="btn btn-success">Salvar Matrícula</button>
                         <a href="{% url 'aluno_detalhe' pk=aluno.pk %}" class="btn btn-secondary">Cancelar</a>
                     </div>
-
+                </form>
             </div>
         </div>
     </div>
-
 </div>
-
 {% endblock %}
-{% block extra_js %}
 
+{% block extra_js %}
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        const modalidadeSelect = document.getElementById('id_modalidade');
-        const turmaSelect = document.getElementById('id_turma');
-        const faixaSelect = document.getElementById('id_faixa');
+        console.log("[DEBUG/JS] DOM carregado. A iniciar script.");
 
-        function carregarOpcoes(modalidadeId) {
-            // Limpa as opções atuais
-            turmaSelect.innerHTML = '<option value="">A carregar turmas...</option>';
-            faixaSelect.innerHTML = '<option value="">A carregar faixas...</option>';
+        const modalidadeSelect = document.getElementById('id_modalidade');
+        if (!modalidadeSelect) {
+            console.error("[DEBUG/JS] ERRO: Seletor de modalidade #id_modalidade não encontrado!");
+            return;
+        }
+
+        modalidadeSelect.addEventListener('change', function() {
+            console.log("======================================");
+            console.log("[DEBUG/JS] Evento 'change' detetado na modalidade.");
+            const modalidadeId = this.value;
+            console.log(`[DEB<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log("[DEBUG/JS] DOM carregado. A iniciar script.");
+
+        const modalidadeSelect = document.getElementById('id_modalidade');
+        if (!modalidadeSelect) {
+            console.error("[DEBUG/JS] ERRO: Seletor de modalidade #id_modalidade não encontrado!");
+            return;
+        }
+
+        modalidadeSelect.addEUG/JS] ID da modalidade selecionada: ${modalidadeId}`);
+
+            const turmaSelect = document.getElementById('id_turma');
+            const faixaSelect = document.getElementById('id_faixa');
 
             if (modalidadeId) {
-                // Busca as turmas
-                fetch(`/gestao/ajax/carregar-turmas/?modalidade_id=${modalidadeId}`)
+                // Busca turmas
+                const turmasUrl = `/gestao/ajax/carregar-turmas/?modalidade_id=${modalidadeId}`;
+                console.log(`[DEBUG/JS] A fazer fetch para: ${turmasUrl}`);
+                fetch(turmasUrl)
                     .then(response => response.json())
                     .then(data => {
+                        console.log("[DEBUG/JS] Dados das turmas recebidos:", data);
                         turmaSelect.innerHTML = '<option value="">---------</option>';
-                        data.forEach(function(turma) {
-                            const option = new Option(turma.display, turma.id);
-                            turmaSelect.add(option);
-                        });
-                    });
-                
-                // Busca as faixas
-                fetch(`/gestao/ajax/carregar-faixas/?modalidade_id=${modalidadeId}`)
+                        data.forEach(turma => turmaSelect.add(new Option(turma.display, turma.id)));
+                    }).catch(error => console.error('[DEBUG/JS] ERRO no fetch de turmas:', error));
+
+                // Busca faixas
+                const faixasUrl = `/gestao/ajax/carregar-faixas/?modalidade_id=${modalidadeId}`;
+                console.log(`[DEBUG/JS] A fazer fetch para: ${faixasUrl}`);
+                fetch(faixasUrl)
                     .then(response => response.json())
                     .then(data => {
+                        console.log("[DEBUG/JS] Dados das faixas recebidos:", data);
                         faixaSelect.innerHTML = '<option value="">---------</option>';
-                        data.forEach(function(faixa) {
-                            const option = new Option(faixa.nome, faixa.id);
-                            faixaSelect.add(option);
-                        });
-                    });
+                        data.forEach(faixa => faixaSelect.add(new Option(faixa.nome, faixa.id)));
+                    }).catch(error => console.error('[DEBUG/JS] ERRO no fetch de faixas:', error));
             } else {
-                // Se nenhuma modalidade for selecionada, limpa os campos
-                turmaSelect.innerHTML = '<option value="">Selecione uma modalidade primeiro</option>';
-                faixaSelect.innerHTML = '<option value="">Selecione uma modalidade primeiro</option>';
+                turmaSelect.innerHTML = '<option value="">Selecione uma modalidade</option>';
+                faixaSelect.innerHTML = '<option value="">Selecione uma modalidade</option>';
             }
-        }
-
-        // Adiciona o "ouvinte" para quando o utilizador muda a modalidade
-        modalidadeSelect.addEventListener('change', function() {
-            carregarOpcoes(this.value);
         });
-
-        // Executa a função uma vez no carregamento da página para o caso de estarmos a editar
-        if (modalidadeSelect.value) {
-            carregarOpcoes(modalidadeSelect.value);
-        }
+        console.log("[DEBUG/JS] 'Ouvinte' de evento adicionado com sucesso.");
     });
 </script>
 {% endblock %}

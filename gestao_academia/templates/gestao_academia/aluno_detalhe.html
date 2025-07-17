@@ -7,8 +7,10 @@
 <div class="card mb-4">
     <div class="card-header d-flex justify-content-between align-items-center">
         <h2>{{ aluno.nome_completo }}</h2>
-        <a href="{% url 'aluno_editar' pk=aluno.pk %}" class="btn btn-secondary">Editar Dados Pessoais</a>
-        <a href="{% url 'registar_pagamento' aluno_pk=aluno.pk %}" class="btn btn-success">Registrar Pagamento</a>
+        <div>
+            <a href="{% url 'registar_pagamento' aluno_pk=aluno.pk %}" class="btn btn-success">Registar Pagamento</a>
+            <a href="{% url 'aluno_editar' pk=aluno.pk %}" class="btn btn-secondary ms-2">Editar Dados</a>
+        </div>
     </div>
     <div class="card-body">
         <div class="row">
@@ -16,100 +18,96 @@
                 {% if aluno.foto %}
                     <img src="{{ aluno.foto.url }}" alt="Foto de {{ aluno.nome_completo }}" class="img-fluid rounded">
                 {% else %}
-                    <div class="bg-secondary text-white text-center p-5 rounded d-flex align-items-center justify-content-center">Sem Foto</div>
+                    <div class="bg-secondary text-white text-center p-5 rounded d-flex align-items-center justify-content-center" style="height: 100%;">
+                        <span>Sem Foto</span>
+                    </div>
                 {% endif %}
             </div>
             <div class="col-md-8">
-                <!-- CAMPO CPF ADICIONADO AQUI -->
                 <p><strong>CPF:</strong> {{ aluno.cpf|default:"Não informado" }}</p>
-                
                 <p><strong>Email:</strong> {{ aluno.email }}</p>
                 <p><strong>Telefone:</strong> {{ aluno.telefone|default:"Não informado" }}</p>
                 <p><strong>Data de Nascimento:</strong> {{ aluno.data_nascimento|date:"d/m/Y" }}</p>
-
-                <!-- LINHA ADICIONADA PARA EXIBIR A IDADE -->
-                 
-               <p><strong>Idade:</strong> {{ aluno.get_idade }} anos</p>
-
-                <!-- CAMPO RESPONSÁVEL ADICIONADO AQUI (COM CONDIÇÃO) -->
+                
+                {% if aluno.get_idade is not None %}
+                    <p><strong>Idade:</strong> {{ aluno.get_idade }} anos</p>
+                {% endif %}
+                
                 {% if aluno.responsavel %}
                     <p><strong>Responsável:</strong> {{ aluno.responsavel }}</p>
                 {% endif %}
-                <p><strong>CEP:</strong> {{ aluno.cep|default:"Não informado" }}</p>
-                <p><strong>Rua:</strong> {{ aluno.rua|default:"Não informada" }}, Nº {{ aluno.numero|default:"S/N" }}</p>
-                <p><strong>Bairro:</strong> {{ aluno.bairro|default:"Não informado" }}</p>
-                <p><strong>Cidade/Estado:</strong> {{ aluno.cidade|default:"Não informada" }} - {{ aluno.estado|default:"--" }}</p>
-                {% if aluno.complemento %}
-                    <p><strong>Complemento:</strong> {{ aluno.complemento }}</p>
-                {% endif %}
+
+                <hr>
+
                 <p><strong>Plano Atual:</strong> {{ aluno.plano.nome|default:"Nenhum" }}</p>
                 <p><strong>Data da Matrícula:</strong> {{ aluno.data_matricula|date:"d/m/Y" }}</p>
             </div>
         </div>
     </div>
 </div>
-<!-- NOVA SECÇÃO PARA MATRÍCULAS E FAIXAS -->
 
-<div class="card">
-    <div class="card-header d-flex justify-content-between aling-item-center">
-        <h3>Matrículas em Modalidade</h3>
-        <!-- Este é o link que causava o erro. Vamos criar a sua URL agora. -->
-         <a href="{% url 'matricula_criar' aluno_pk=aluno.pk %}" class="btn btn-primary">Adicionar Matrícula </a>
+<div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h3>Matrículas em Modalidades</h3>
+        <a href="{% url 'matricula_criar' aluno_pk=aluno.pk %}" class="btn btn-primary">Adicionar Matrícula</a>
     </div>
     <div class="card-body">
         {% if aluno.matriculamodalidade_set.all %}
-            <ul class="list-group">
+            <ul class="list-group list-group-flush">
                 {% for matricula in aluno.matriculamodalidade_set.all %}
-                    <li class='list-group-item d-flex justify-content-between align-items-center'>
-                        <div >
-                            <strong>{{ matricula.modalidade.nome}}</strong><br>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>{{ matricula.modalidade.nome }}</strong>
+                            {# --- CORREÇÃO --- #}
+                            {# Adicionamos este bloco para exibir a turma associada à matrícula #}
                             {% if matricula.turma %}
-                                <span class="badge bg-segundary">{{ matricula.turma}}</span>
-                            {% endif %}    
-                            <small class="text-muted">Faixa:{{ matricula.faixa.nome|default:"Nenhuma faixa atribuída"}}</small>
+                                <span class="badge bg-info text-dark ms-2">{{ matricula.turma }}</span>
+                            {% endif %}
+                            <br>
+                            <small class="text-muted">Faixa: {{ matricula.faixa.nome|default:"Nenhuma faixa atribuída" }}</small>
                         </div>
-                         <!-- NOVOS BOTÕES DE AÇÃO -->
                         <div>
                             <a href="{% url 'matricula_editar' pk=matricula.pk %}" class="btn btn-sm btn-outline-secondary">Editar</a>
                             <a href="{% url 'matricula_apagar' pk=matricula.pk %}" class="btn btn-sm btn-outline-danger ms-2">Apagar</a>
                         </div>
                     </li>
                 {% endfor %}
-
             </ul>
         {% else %}
             <p>Este aluno não está matriculado em nenhuma modalidade.</p>
         {% endif %}
     </div>
-    <div class="card mt-4">
-        <div class="card-header">
-            <h3>Histórico de Pagamentos</h3>
-        </div>
-        <div class="card-body">
-            {% if aluno.pagamentos.all %}
-                <ul class="list-group">
-                    {% for pgto in aluno.pagamentos.all %}
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <div>
-                                Pagamento de <strong>R$ {{ pgto.valor|floatformat:2 }}</strong> referente a <strong>{{ pgto.mes_referencia|date:"F/Y" }}</strong>.
-                                <br>
-                                <small class="text-muted">Realizado em {{ pgto.data_pagamento|date:"d/m/Y" }} via {{ pgto.get_forma_pagamento_display }}</small>
-                            </div>
-                            <!-- NOVO BOTÃO DE APAGAR -->
-                            <div>
-                                <a href="{% url 'pagamento_apagar' pk=pgto.pk %}" class="btn btn-sm btn-outline-danger">
-                                    Apagar
-                                </a>
-                            </div>
-                        </li>
-                    {% endfor %}
-                </ul>
-            {% else %}
-                <p>Nenhum pagamento registado para este aluno.</p>
-            {% endif %}
-        </div>
-    </div>
+</div>
 
+<div class="card mt-4">
+    <div class="card-header">
+        <h3>Histórico de Pagamentos</h3>
+    </div>
+    <div class="card-body">
+        {% if aluno.pagamentos.all %}
+            <ul class="list-group list-group-flush">
+                {% for pgto in aluno.pagamentos.all %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            Pagamento de <strong>R$ {{ pgto.valor|floatformat:2 }}</strong> referente a <strong>{{ pgto.mes_referencia|date:"F/Y" }}</strong>.
+                            <br>
+                            <small class="text-muted">Realizado em {{ pgto.data_pagamento|date:"d/m/Y" }} via {{ pgto.get_forma_pagamento_display }}</small>
+                        </div>
+                        <div>
+                            <a href="{% url 'pagamento_apagar' pk=pgto.pk %}" class="btn btn-sm btn-outline-danger">Apagar</a>
+                        </div>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>Nenhum pagamento registado para este aluno.</p>
+        {% endif %}
+    </div>
+</div>
+
+    <div class="mt-4">
+        <a href="{% url 'lista_alunos' %}" class="btn btn-outline-secondary">Voltar à Lista de Alunos</a>
+    </div>
 </div>
 
 {% endblock %}

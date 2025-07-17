@@ -1,125 +1,78 @@
 # gestao_academia/forms.py
 from django import forms
 from datetime import date
-# Importações corretas dos modelos necessários
-from .models import Modalidade, Aluno, Plano, Faixa, Turma, MatriculaModalidade
-from .models import Pagamento
-from .models import Instrutor, Turma
-
-
+from .models import (
+    Modalidade, Aluno, Plano, Faixa, 
+    Turma, Matricula, Instrutor, Pagamento, Horario
+)
 
 class ModalidadeForm(forms.ModelForm):
     class Meta:
         model = Modalidade
-        fields = ['nome', 'descricao']
-        widgets = {
-            'nome': forms.TextInput(attrs={'class': 'form-control'}),
-            'descricao': forms.Textarea(attrs={'class': 'form-control', 'rows': 4}),
-        }
+        fields = ['nome', 'descricao', 'utiliza_faixas']
 
 class AlunoForm(forms.ModelForm):
     class Meta:
         model = Aluno
-        fields = ['nome_completo', 'cpf', 'data_nascimento', 'responsavel', 'telefone', 'email', 'plano', 'foto', 'cep', 'rua', 'numero', 'complemento', 'bairro', 'cidade', 'estado']
+        exclude = ['turmas']
         widgets = {
-            'nome_completo': forms.TextInput(attrs={'class': 'form-control'}),
-            'cpf': forms.TextInput(attrs={'class': 'form-control'}),
-            'responsavel': forms.TextInput(attrs={'class': 'form-control'}),
-            'telefone': forms.TextInput(attrs={'class': 'form-control'}),
-            'email': forms.EmailInput(attrs={'class': 'form-control'}),
-            'plano': forms.Select(attrs={'class': 'form-select'}),
-            'foto': forms.ClearableFileInput(attrs={'class': 'form-control'}),
-            'cep': forms.TextInput(attrs={'class': 'form-control', 'id': 'cep'}),
-            'rua': forms.TextInput(attrs={'class': 'form-control', 'id': 'rua'}),
-            'numero': forms.TextInput(attrs={'class': 'form-control'}),
-            'complemento': forms.TextInput(attrs={'class': 'form-control'}),
-            'bairro': forms.TextInput(attrs={'class': 'form-control', 'id': 'bairro'}),
-            'cidade': forms.TextInput(attrs={'class': 'form-control', 'id': 'cidade'}),
-            'estado': forms.TextInput(attrs={'class': 'form-control', 'id': 'uf'}),
-            'data_nascimento': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'data_nascimento': forms.DateInput(attrs={'type': 'date'}),
+            'cpf': forms.TextInput(attrs={'placeholder': '000.000.000-00'}),
         }
 
-    def clean(self):
-        cleaned_data = super().clean()
-        data_nascimento = cleaned_data.get("data_nascimento")
-        responsavel = cleaned_data.get("responsavel")
-
-        if data_nascimento:
-            hoje = date.today()
-            idade = hoje.year - data_nascimento.year - ((hoje.month, hoje.day) < (data_nascimento.month, data_nascimento.day))
-            if idade < 18 and not responsavel:
-                self.add_error('responsavel', 'O nome do responsável é obrigatório para menores de 18 anos.')
-        return cleaned_data
-
-# Matricula Modalidade Formulário
-
-class MatriculaModalidadeForm(forms.ModelForm):
+class InstrutorForm(forms.ModelForm):
     class Meta:
-        model = MatriculaModalidade
-        fields = ['modalidade', 'turma', 'faixa'] 
+        model = Instrutor
+        fields = '__all__'
+
+class TurmaForm(forms.ModelForm):
+    class Meta:
+        model = Turma
+        fields = '__all__'
+
+class PagamentoForm(forms.ModelForm):
+    class Meta:
+        model = Pagamento
+        fields = ['valor', 'data_pagamento', 'mes_referencia', 'forma_pagamento']
         widgets = {
-            'modalidade': forms.Select(attrs={'class': 'form-select', 'id': 'id_modalidade'}),
+            'data_pagamento': forms.DateInput(attrs={'type': 'date'}),
+            'mes_referencia': forms.DateInput(attrs={'type': 'date'}),
+        }
+
+# --- FORMULÁRIO DE MATRÍCULA CORRIGIDO ---
+class MatriculaForm(forms.ModelForm):
+    # Adicionamos um campo extra que não está no modelo, apenas para filtrar.
+    modalidade = forms.ModelChoiceField(
+        queryset=Modalidade.objects.all(),
+        label="Modalidade",
+        widget=forms.Select(attrs={'class': 'form-select', 'id': 'id_modalidade'})
+    )
+
+    class Meta:
+        model = Matricula
+        # A 'modalidade' não está aqui porque não é um campo do modelo Matricula.
+        fields = ['turma', 'faixa']
+        widgets = {
             'turma': forms.Select(attrs={'class': 'form-select', 'id': 'id_turma'}),
             'faixa': forms.Select(attrs={'class': 'form-select', 'id': 'id_faixa'}),
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Começamos com os campos de turma e faixa vazios.
-        # Eles serão preenchidos pelo JavaScript.
         self.fields['turma'].queryset = Turma.objects.none()
         self.fields['faixa'].queryset = Faixa.objects.none()
 
-        # Se estamos a editar uma matrícula que já existe
-        if 'instance' in kwargs and kwargs['instance'].pk:
-            instance = kwargs['instance']
-            if instance.modalidade:
-                # Preenchemos as opções de turma e faixa com base na modalidade já guardada.
-                self.fields['turma'].queryset = Turma.objects.filter(modalidade=instance.modalidade).order_by('dia_da_semana', 'horario_inicio')
-                self.fields['faixa'].queryset = Faixa.objects.filter(modalidade=instance.modalidade).order_by('ordem')
-
-            
-# NOVO FORMULÁRIO PARA PAGAMENTOS
-class PagamentoForm(forms.ModelForm):
-    mes_referencia = forms.DateField(
-        label="Mês de Referência",
-        widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control'})
-    )
-    data_pagamento = forms.DateField(
-        label = "Data do Pagamento",
-        widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control'})
-    )
-    class Meta:
-        model = Pagamento
-        fields = ['valor', 'mes_referencia', 'data_pagamento', 'forma_pagamento']
-        widgets = {
-            'valor': forms.NumberInput(attrs={'class': 'form_pagamento'}),
-            'forma_pagamento': forms.Select(attrs={'class': 'form-select'}),
-        }
-
-# NOVO FORMULÁRIO PARA INSTRUTORES
-class InstrutorForm(forms.ModelForm):
-    class Meta:
-        model = Instrutor
-        fields = ['nome', 'email', 'telefone']
-        widgets = {
-            'nome' : forms.TextInput(attrs={'class': 'form-control'}),
-            'telefone' : forms.TextInput(attrs={'class': 'form-control'}),
-            'email' : forms.EmailInput(attrs={'class': 'form-control'}),
-        }        
-# NOVO FORMULÁRIO PARA TURMAS
-class TurmaForm(forms.ModelForm):
-    class Meta:
-        model = Turma
-        fields = ['modalidade', 'instrutor', 'dia_da_semana', 'horario_inicio', 'horario_fim', 'max_alunos']
-        widgets = {
-            'modalidade' :  forms.Select(attrs={'class': 'form-select'}),
-            'instrutor' : forms.Select(attrs={'class': 'form-select'}),
-            'dia_da_semana' : forms.Select(attrs={'class': 'form-select'}),
-            'horario_inicio' : forms.TimeInput(attrs={'type': 'time', 'class': 'form-control'}),
-            'horario_fim' : forms.TimeInput(attrs={'type': 'time', 'class': 'form-control'}),
-            'max_alunos' : forms.NumberInput(attrs={'class': 'form-control'}),
-
-        }
-
-
+        # Se o formulário for submetido (POST), precisamos de preencher os querysets
+        # para que a validação funcione.
+        if 'modalidade' in self.data:
+            try:
+                modalidade_id = int(self.data.get('modalidade'))
+                self.fields['turma'].queryset = Turma.objects.filter(modalidade_id=modalidade_id).order_by('nome')
+                self.fields['faixa'].queryset = Faixa.objects.filter(modalidade_id=modalidade_id).order_by('ordem')
+            except (ValueError, TypeError):
+                pass
+        # Se estivermos a editar uma instância existente, também preenchemos os querysets.
+        elif self.instance.pk and self.instance.turma:
+            self.fields['modalidade'].initial = self.instance.turma.modalidade
+            self.fields['turma'].queryset = Turma.objects.filter(modalidade=self.instance.turma.modalidade)
+            self.fields['faixa'].queryset = Faixa.objects.filter(modalidade=self.instance.turma.modalidade)

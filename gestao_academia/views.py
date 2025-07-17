@@ -5,54 +5,62 @@ from django.contrib import messages
 from datetime import date
 from django.core.paginator import Paginator
 from django.db.models import Sum
+from django.http import JsonResponse
+
 from .models import (
-    Modalidade, Aluno, MatriculaModalidade, Plano, 
-    Faixa, Instrutor, Turma, Pagamento
+    Modalidade, Aluno, Plano, Faixa, 
+    Turma, Matricula, Instrutor, Pagamento, Horario
 )
 from .forms import (
-    ModalidadeForm, AlunoForm, MatriculaModalidadeForm, 
+    ModalidadeForm, AlunoForm, MatriculaForm, 
     PagamentoForm, InstrutorForm, TurmaForm
 )
-from django.http import JsonResponse
 
 @login_required
 def dashboard(request):
-    hoje = date.today()
+    print("\n--- INICIANDO TESTE DE DEPURAÇÃO NO DASHBOARD ---")
+    
+    # --- Mude o número 3 para o ID de uma modalidade que você SABE que tem turmas registadas ---
+    modalidade_id_teste = 3 
+    print(f"A procurar turmas para a modalidade com ID: {modalidade_id_teste}")
+    
+    # Executamos a mesma query que a nossa view AJAX faz
+    turmas_encontradas = Turma.objects.filter(modalidade_id=modalidade_id_teste)
+    
+    print(f"Query executada: Turma.objects.filter(modalidade_id={modalidade_id_teste})")
+    print(f"Resultado (QuerySet): {turmas_encontradas}")
+    print(f"Número de turmas encontradas: {turmas_encontradas.count()}")
+    
+    if turmas_encontradas.exists():
+        print("Turmas encontradas:")
+        for turma in turmas_encontradas:
+            print(f"  - Turma ID {turma.id}: {str(turma)}")
+    else:
+        print("Nenhuma turma encontrada para esta modalidade.")
 
-    # --- LÓGICA EXISTENTE ---
+    print("--- FIM DO TESTE DE DEPURAÇÃO ---\n")
+    
+    # O resto do código do dashboard continua igual para a página carregar
     total_alunos = Aluno.objects.count()
+    total_planos = Plano.objects.count()
+    total_modalidades = Modalidade.objects.count()
     ultimos_alunos = Aluno.objects.order_by('-data_matricula')[:5]
+    hoje = date.today()
     dia_semana_hoje = hoje.isoweekday() 
-    turmas_hoje = Turma.objects.filter(dia_da_semana=dia_semana_hoje).order_by('horario_inicio')
-
-    # --- NOVA LÓGICA FINANCEIRA ---
-
-    # 1. Calcular a receita do mês atual
-    receita_mes_atual = Pagamento.objects.filter(
-        data_pagamento__year=hoje.year,
-        data_pagamento__month=hoje.month
-    ).aggregate(Sum('valor'))['valor__sum'] or 0.00
-
-    # 2. Encontrar alunos com mensalidades pendentes para o mês atual
-    ids_alunos_pagos = Pagamento.objects.filter(
-        mes_referencia__year=hoje.year,
-        mes_referencia__month=hoje.month
-    ).values_list('aluno_id', flat=True)
-
-    alunos_pendentes = Aluno.objects.exclude(id__in=ids_alunos_pagos).order_by('nome_completo')
+    turmas_hoje = Turma.objects.filter(horarios__dia_da_semana=dia_semana_hoje).distinct().order_by('horarios__horario_inicio')
 
     contexto = {
         'total_alunos': total_alunos,
+        'total_planos': total_planos,
+        'total_modalidades': total_modalidades,
         'ultimos_alunos': ultimos_alunos,
         'turmas_hoje': turmas_hoje,
-        'receita_mes_atual': receita_mes_atual, # Nova variável
-        'alunos_pendentes': alunos_pendentes,   # Nova variável
-        'titulo': 'Dashboard'
+        'alunos_pendentes': [], # Apenas para evitar erros no template
+        'receita_mes_atual': 0, # Apenas para evitar erros no template
+        'titulo': 'Dashboard de Teste'
     }
     return render(request, 'gestao_academia/dashboard.html', contexto)
-
-
-# --- VIEWS PARA MODALIDADES ---
+# --- CRUD PARA MODALIDADES ---
 @login_required
 def lista_modalidades(request):
     modalidades = Modalidade.objects.all()
@@ -93,10 +101,10 @@ def apagar_modalidade(request, pk):
     return render(request, 'gestao_academia/modalidade_confirm_delete.html', {'modalidade': modalidade})
 
 
-# --- VIEWS PARA ALUNOS ---
+# --- CRUD PARA ALUNOS ---
 @login_required
 def lista_alunos(request):
-    alunos = Aluno.objects.select_related('plano').prefetch_related('pagamentos').order_by('nome_completo')
+    alunos = Aluno.objects.all()
     return render(request, 'gestao_academia/aluno_lista.html', {'alunos': alunos})
 
 @login_required
@@ -110,11 +118,11 @@ def aluno_criar(request):
         form = AlunoForm(request.POST, request.FILES)
         if form.is_valid():
             form.save()
-            messages.success(request, 'Aluno registado com sucesso!')
+            messages.success(request, 'Aluno criado com sucesso!')
             return redirect('lista_alunos')
     else:
         form = AlunoForm()
-    return render(request, 'gestao_academia/aluno_form.html', {'form': form, 'titulo': 'Registar Novo Aluno'})
+    return render(request, 'gestao_academia/aluno_form.html', {'form': form, 'titulo': 'Criar Aluno'})
 
 @login_required
 def aluno_editar(request, pk):
@@ -123,7 +131,7 @@ def aluno_editar(request, pk):
         form = AlunoForm(request.POST, request.FILES, instance=aluno)
         if form.is_valid():
             form.save()
-            messages.success(request, 'Dados do aluno atualizados com sucesso!')
+            messages.success(request, 'Aluno atualizado com sucesso!')
             return redirect('lista_alunos')
     else:
         form = AlunoForm(instance=aluno)
@@ -138,123 +146,11 @@ def aluno_apagar(request, pk):
         return redirect('lista_alunos')
     return render(request, 'gestao_academia/aluno_confirm_delete.html', {'aluno': aluno})
 
-# --- VIEW PARA MATRÍCULAS ---
-def matricula_criar(request, aluno_pk):
-    aluno = get_object_or_404(Aluno, pk=aluno_pk)
-    if request.method == 'POST':
-        form = MatriculaModalidadeForm(request.POST)
-        if form.is_valid():
-            matricula = form.save(commit=False)
-            matricula.aluno = aluno
-            matricula.save()
-            messages.success(request, f'Matrícula em {matricula.modalidade.nome} adicionada com sucesso!')
-            return redirect('aluno_detalhe', pk=aluno_pk)
-    else:
-        form = MatriculaModalidadeForm()
 
-    # A lógica de filtragem dinâmica foi removida daqui, pois agora é desnecessária.
-
-    contexto = {
-        'form': form,
-        'aluno': aluno,
-        'titulo': f'Nova Matrícula para {aluno.nome_completo}'
-    }
-    return render(request, 'gestao_academia/matricula_form.html', contexto)
-
-@login_required
-def matricula_editar(request, pk):
-    matricula = get_object_or_404(MatriculaModalidade, pk=pk)
-    if request.method == 'POST':
-        form = MatriculaModalidadeForm(request.POST, instance=matricula)
-        if form.is_valid():
-            form.save()
-            messages.success(request, 'Matrícula atualizada com sucesso!')
-            return redirect('aluno_detalhe', pk=matricula.aluno.pk)
-    else:
-        form = MatriculaModalidadeForm(instance=matricula)
-
-    contexto = {
-        'form': form,
-        'aluno': matricula.aluno,
-        'titulo': f'Editar Matrícula de {matricula.aluno.nome_completo}'
-    }
-    return render(request, 'gestao_academia/matricula_form.html', contexto)
-
-@login_required
-def matricula_apagar(request, pk):
-    matricula = get_object_or_404(MatriculaModalidade, pk=pk)
-    aluno_pk = matricula.aluno.pk
-    if request.method == 'POST':
-        matricula.delete()
-        messages.success(request, 'Matrícula apagada com sucesso!')
-        return redirect('aluno_detalhe', pk=aluno_pk)
-
-    return render(request, 'gestao_academia/matricula_confirm_delete.html', {'matricula': matricula})
-
-
-# --- VIEWS PARA PAGAMENTOS ---
-@login_required
-def registar_pagamento(request, aluno_pk):
-    aluno = get_object_or_404(Aluno, pk=aluno_pk)
-    contexto = {
-        'aluno': aluno,
-        'titulo': f'Registar Pagamento para {aluno.nome_completo}'
-    }
-    if request.method == 'POST':
-        form = PagamentoForm(request.POST)
-        if form.is_valid():
-            pagamento = form.save(commit=False)
-            pagamento.aluno = aluno
-            pagamento.save()
-            messages.success(request, 'Pagamento registado com sucesso!')
-            return redirect('aluno_detalhe', pk=aluno.pk)
-    else:
-        form = PagamentoForm(initial={'valor': aluno.plano.valor if aluno.plano else 0})
-    contexto['form'] = form
-    return render(request, 'gestao_academia/pagamento_form.html', contexto)
-
-@login_required
-def lista_pagamentos(request):
-    queryset = Pagamento.objects.all().order_by('-data_pagamento')
-    termo_pesquisa = request.GET.get('pesquisa', '')
-    data_inicio = request.GET.get('data_inicio', '')
-    data_fim = request.GET.get('data_fim', '')
-    if termo_pesquisa:
-        queryset = queryset.filter(aluno__nome_completo__icontains=termo_pesquisa)
-    if data_inicio:
-        queryset = queryset.filter(data_pagamento__gte=data_inicio)
-    if data_fim:
-        queryset = queryset.filter(data_pagamento__lte=data_fim)
-    paginador = Paginator(queryset, 10)
-    pagina_num = request.GET.get('pagina')
-    pagina_obj = paginador.get_page(pagina_num)
-    contexto = {
-        'pagina_obj': pagina_obj, 
-        'titulo': 'Histórico de Pagamentos',
-        'termo_pesquisa': termo_pesquisa,
-        'data_inicio': data_inicio,
-        'data_fim': data_fim,
-    }
-    return render(request, 'gestao_academia/pagamento_lista.html', contexto)
-
-@login_required
-def pagamento_apagar(request, pk):
-    pagamento = get_object_or_404(Pagamento, pk=pk)
-    aluno_pk = pagamento.aluno.pk
-    if request.method == 'POST':
-        pagamento.delete()
-        messages.success(request, 'Pagamento apagado com sucesso!')
-        return redirect('aluno_detalhe', pk=aluno_pk)
-    contexto = {
-        'pagamento': pagamento,
-        'aluno': pagamento.aluno,
-    }
-    return render(request, 'gestao_academia/pagamento_confirm_delete.html', contexto)
-
-# --- VIEWS PARA INSTRUTORES ---
+# --- CRUD PARA INSTRUTORES ---
 @login_required
 def lista_instrutores(request):
-    instrutores = Instrutor.objects.all().order_by('nome')
+    instrutores = Instrutor.objects.all()
     return render(request, 'gestao_academia/instrutor_lista.html', {'instrutores': instrutores})
 
 @login_required
@@ -291,16 +187,20 @@ def instrutor_apagar(request, pk):
         return redirect('lista_instrutores')
     return render(request, 'gestao_academia/instrutor_confirm_delete.html', {'instrutor': instrutor})
 
-# --- VIEWS PARA TURMAS/HORÁRIOS ---
+
+# --- CRUD PARA TURMAS E HORÁRIOS ---
 @login_required
 def grade_horarios(request):
-    turmas = Turma.objects.all()
-    dias_com_turmas = {}
-    for dia_num, dia_nome in Turma.DIAS_SEMANA:
-        turmas_do_dia = turmas.filter(dia_da_semana=dia_num)
-        if turmas_do_dia:
-            dias_com_turmas[dia_nome] = turmas_do_dia
-    return render(request, 'gestao_academia/grade_horarios.html', {'dias_com_turmas': dias_com_turmas})
+    # Buscamos todas as turmas e usamos 'prefetch_related' para carregar
+    # todos os seus horários de uma forma eficiente, evitando múltiplas queries.
+    turmas = Turma.objects.prefetch_related('horarios').order_by('nome')
+
+    contexto = {
+        'turmas': turmas,
+        'titulo': 'Grade de Horários'
+    }
+    return render(request, 'gestao_academia/grade_horarios.html', contexto)
+
 
 @login_required
 def turma_criar(request):
@@ -337,24 +237,97 @@ def turma_apagar(request, pk):
     return render(request, 'gestao_academia/turma_confirm_delete.html', {'turma': turma})
 
 
-# --- NOVA VIEW AUXILIAR PARA AJAX/JAVASCRIPT ---
+# --- CRUD PARA MATRÍCULAS ---
+@login_required
+def matricula_criar(request, aluno_pk):
+    aluno = get_object_or_404(Aluno, pk=aluno_pk)
+    if request.method == 'POST':
+        form = MatriculaForm(request.POST)
+        if form.is_valid():
+            matricula = form.save(commit=False)
+            matricula.aluno = aluno
+            matricula.save()
+            messages.success(request, 'Aluno matriculado na turma com sucesso!')
+            return redirect('aluno_detalhe', pk=aluno.pk)
+    else:
+        form = MatriculaForm()
+
+    return render(request, 'gestao_academia/matricula_form.html', {'form': form, 'aluno': aluno})
+
+@login_required
+def matricula_editar(request, pk):
+    matricula = get_object_or_404(Matricula, pk=pk)
+    if request.method == 'POST':
+        form = MatriculaForm(request.POST, instance=matricula)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Matrícula atualizada com sucesso!')
+            return redirect('aluno_detalhe', pk=matricula.aluno.pk)
+    else:
+        form = MatriculaForm(instance=matricula)
+    return render(request, 'gestao_academia/matricula_form.html', {'form': form, 'aluno': matricula.aluno})
+
+@login_required
+def matricula_apagar(request, pk):
+    matricula = get_object_or_404(Matricula, pk=pk)
+    aluno_pk = matricula.aluno.pk
+    if request.method == 'POST':
+        matricula.delete()
+        messages.success(request, 'Matrícula apagada com sucesso!')
+        return redirect('aluno_detalhe', pk=aluno_pk)
+    return render(request, 'gestao_academia/matricula_confirm_delete.html', {'matricula': matricula})
+
+
+# --- VIEWS DE PAGAMENTOS ---
+@login_required
+def lista_pagamentos(request):
+    pagamentos = Pagamento.objects.all()
+    return render(request, 'gestao_academia/pagamento_lista.html', {'pagamentos': pagamentos})
+
+@login_required
+def registar_pagamento(request, aluno_pk):
+    aluno = get_object_or_404(Aluno, pk=aluno_pk)
+    if request.method == 'POST':
+        form = PagamentoForm(request.POST)
+        if form.is_valid():
+            pagamento = form.save(commit=False)
+            pagamento.aluno = aluno
+            pagamento.save()
+            messages.success(request, 'Pagamento registado com sucesso!')
+            return redirect('aluno_detalhe', pk=aluno.pk)
+    else:
+        form = PagamentoForm(initial={'valor': aluno.plano.valor if aluno.plano else 0})
+    return render(request, 'gestao_academia/pagamento_form.html', {'form': form, 'aluno': aluno})
+
+def pagamento_apagar(request, pk):
+    pagamento = get_object_or_404(Pagamento, pk=pk)
+    aluno_pk = pagamento.aluno.pk
+    if request.method == 'POST':
+        pagamento.delete()
+        messages.success(request, 'Pagamento apagado com sucesso!')
+        return redirect('aluno_detalhe', pk=aluno_pk)
+    return render(request, 'gestao_academia/pagamento_confirm_delete.html', {'pagamento': pagamento})
+
+
+# --- VIEWS AUXILIARES PARA AJAX ---
+def carregar_opcoes_matricula(request):
+    turma_id = request.GET.get('turma_id')
+    faixas = Faixa.objects.none()
+    if turma_id:
+        try:
+            turma = Turma.objects.get(pk=turma_id)
+            if turma.modalidade.utiliza_faixas:
+                faixas = Faixa.objects.filter(modalidade=turma.modalidade)
+        except Turma.DoesNotExist:
+            pass
+    
+    return JsonResponse(list(faixas.values('id', 'nome')), safe=False)
 def carregar_turmas(request):
-    modalidade_id = request.GET.get('moalidade_id')
-    turmas = Turma.objects.filter(modalidade_id=modalidade_id).order_by('dia_da_semana', 'horario_inicio')
+    modalidade_id = request.GET.get('modalidade_id')
+    turmas = Turma.objects.filter(modalidade_id=modalidade_id).order_by('nome')
+    return JsonResponse(list(turmas.values('id', 'nome')), safe=False)
 
-    turmas_lista = []
-    for turma in turmas:
-        turmas_lista.append({
-            'id': turma.id,
-            'display': srt(turma) # Usa o __str__ do modelo para um texto descritivo
-        })
-    return  JsonResponse(turmas_lista, safe=False)    
-
-# --- NOVA VIEW PARA CARREGAR FAIXAS ---
 def carregar_faixas(request):
     modalidade_id = request.GET.get('modalidade_id')
-    # Busca as faixas que pertencem à modalidade selecionada
     faixas = Faixa.objects.filter(modalidade_id=modalidade_id).order_by('ordem')
-    # Formata os dados para serem enviados como JSON
-    faixas_list = list(faixas.values('id', 'nome'))
-    return JsonResponse(faixas_list, safe=False)
+    return JsonResponse(list(faixas.values('id', 'nome')), safe=False)

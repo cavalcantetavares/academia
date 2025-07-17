@@ -1,27 +1,31 @@
 # gestao_academia/admin.py
 from django.contrib import admin
-# Garanta que todos os modelos estão a ser importados
-from .models import Modalidade, Plano, Faixa, Aluno, MatriculaModalidade, Instrutor, Turma
+# CORREÇÃO: O nome do modelo mudou de MatriculaModalidade para Matricula
+from .models import Modalidade, Plano, Faixa, Aluno, Instrutor, Turma, Horario, Matricula
 
-class MatriculaModalidadeInline(admin.TabularInline):
-    model = MatriculaModalidade
+# Define que os Horários podem ser editados na mesma página da Turma
+class HorarioInline(admin.TabularInline):
+    model = Horario
+    extra = 1 # Mostra 1 campo de horário vazio por defeito
+
+@admin.register(Turma)
+class TurmaAdmin(admin.ModelAdmin):
+    list_display = ('nome', 'modalidade', 'instrutor')
+    list_filter = ('modalidade', 'instrutor')
+    inlines = [HorarioInline] # Adiciona os horários à página da turma
+
+class MatriculaInline(admin.TabularInline):
+    model = Matricula
     extra = 1
 
 @admin.register(Aluno)
 class AlunoAdmin(admin.ModelAdmin):
-    list_display = ('nome_completo', 'email', 'telefone', 'plano')
+    list_display = ('nome_completo', 'email', 'plano')
     search_fields = ('nome_completo', 'email')
-    list_filter = ('plano',)
-    inlines = [MatriculaModalidadeInline]
+    inlines = [MatriculaInline]
 
-@admin.register(Modalidade)
-class ModalidadeAdmin(admin.ModelAdmin):
-    list_display = ('nome', 'utiliza_faixas')
-    list_filter = ('utiliza_faixas',)
-
-# --- CORREÇÃO ---
-# Adicionamos o registo de Instrutor e Turma que estava em falta.
+# Registos simples para os outros modelos
+admin.site.register(Modalidade)
 admin.site.register(Plano)
 admin.site.register(Faixa)
 admin.site.register(Instrutor)
-admin.site.register(Turma)
